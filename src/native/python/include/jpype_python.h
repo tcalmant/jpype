@@ -17,8 +17,6 @@
 #ifndef _JPYPE_PYTHON_H_
 #define _JPYPE_PYTHON_H_
 
-
-
 // This file defines the _jpype module's interface and initializes it
 #include <jpype.h>
 #include <Python.h>
@@ -33,6 +31,10 @@ typedef int Py_ssize_t;
 #endif
 
 #include "pythonenv.h"
+
+// Utility module to hide PyCObject_type API change
+#include "capsulethunk.h"
+#define CAPSULE_EXTRACT(obj) PyCapsule_GetPointer(obj, PyCapsule_GetName(obj))
 
 class JPypeModule
 {
