@@ -17,7 +17,6 @@
 #ifndef _PYHOSTENV_H_
 #define _PYHOSTENV_H_
 
-
 class PythonHostEnvironment : public HostEnvironment
 {
 public :
@@ -89,29 +88,30 @@ public :
 		m_JavaExceptionClass = obj;
 	}  
 
-	static void deleteJPObjectDestructor(void* data, void* desc);
+	static void deleteJPObjectDestructor(PyObject* data);
 
-	static void deleteJPArrayDestructor(void* data, void* desc)
+	static void deleteJPArrayDestructor(PyObject* data)
 	{
-		delete (JPArray*)data;
+		JPArray* content = (JPArray*) CAPSULE_EXTRACT(data);
+		delete content;
 	}
 
-	static void deleteObjectJValueDestructor(void* data, void* desc)
+	static void deleteObjectJValueDestructor(PyObject* data)
 	{
-		jvalue* pv = (jvalue*)data;
+		jvalue* pv = (jvalue*) CAPSULE_EXTRACT(data);
 		JPEnv::getJava()->DeleteGlobalRef(pv->l);
 		delete pv;
 	}
 
-	static void deleteJValueDestructor(void* data, void* desc)
+	static void deleteJValueDestructor(PyObject* data)
 	{
-		jvalue* pv = (jvalue*)data;
+		jvalue* pv = (jvalue*) CAPSULE_EXTRACT(data);
 		delete pv;
 	}
 
-	static void deleteJPProxyDestructor(void* data, void* desc)
+	static void deleteJPProxyDestructor(PyObject* data)
 	{
-		JPProxy* pv = (JPProxy*)data;
+		JPProxy* pv = (JPProxy*) CAPSULE_EXTRACT(data);
 		delete pv;
 	}
 

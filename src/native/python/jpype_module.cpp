@@ -28,7 +28,7 @@ PyObject* JPypeModule::startup(PyObject* obj, PyObject* args)
 
 		if (! (JPyString::check(vmPath)))
 		{
-			RAISE(JPypeException, "First paramter must be a string or unicode");
+			RAISE(JPypeException, "First parameter must be a string or unicode");
 		}
 
 		string cVmPath = JPyString::asString(vmPath);
@@ -79,7 +79,7 @@ PyObject* JPypeModule::attach(PyObject* obj, PyObject* args)
 
 		if (! (JPyString::check(vmPath)))
 		{
-			RAISE(JPypeException, "First paramter must be a string or unicode");
+			RAISE(JPypeException, "First parameter must be a string or unicode");
 		}
 
 		string cVmPath = JPyString::asString(vmPath);
@@ -143,7 +143,7 @@ PyObject* JPypeModule::synchronized(PyObject* obj, PyObject* args)
 	try {
 		PyObject* o;
 		
-		JPyArg::parseTuple(args, "O!", &PyCObject_Type, &o);
+		JPyArg::parseTuple(args, "O!", &PyCapsule_Type, &o);
 		string desc = (char*)JPyCObject::getDesc(o);
 
 		jobject obj;

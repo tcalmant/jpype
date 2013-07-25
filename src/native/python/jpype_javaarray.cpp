@@ -30,7 +30,7 @@ PyObject* JPypeJavaArray::findArrayClass(PyObject* obj, PyObject* args)
 			return Py_None;
 		}
 
-		PyObject* res = JPyCObject::fromVoidAndDesc((void*)claz, (void*)"jclass", NULL);
+		PyObject* res = JPyCObject::fromVoidAndDesc((void*)claz, "jclass", NULL);
 
 		return res;
 	}
@@ -78,7 +78,7 @@ PyObject* JPypeJavaArray::getArrayLength(PyObject* self, PyObject* arg)
 {
 	try {
 		PyObject* arrayObject;
-		JPyArg::parseTuple(arg, "O!", &PyCObject_Type, &arrayObject);
+		JPyArg::parseTuple(arg, "O!", &PyCapsule_Type, &arrayObject);
 		JPArray* a = (JPArray*)JPyCObject::asVoidPtr(arrayObject);
 
 		int res = a->getLength();
@@ -96,7 +96,7 @@ PyObject* JPypeJavaArray::getArrayItem(PyObject* self, PyObject* arg)
 	try {
 		PyObject* arrayObject;
 		int ndx;
-		JPyArg::parseTuple(arg, "O!i", &PyCObject_Type, &arrayObject, &ndx);
+		JPyArg::parseTuple(arg, "O!i", &PyCapsule_Type, &arrayObject, &ndx);
 		JPArray* a = (JPArray*)JPyCObject::asVoidPtr(arrayObject);
 
 		HostRef* res = a->getItem(ndx);
@@ -113,7 +113,7 @@ PyObject* JPypeJavaArray::getArraySlice(PyObject* self, PyObject* arg)
 		PyObject* arrayObject;
 		int ndx;
 		int ndx2;
-		JPyArg::parseTuple(arg, "O!ii", &PyCObject_Type, &arrayObject, &ndx, &ndx2);
+		JPyArg::parseTuple(arg, "O!ii", &PyCapsule_Type, &arrayObject, &ndx, &ndx2);
 		JPArray* a = (JPArray*)JPyCObject::asVoidPtr(arrayObject);
 
 		vector<HostRef*> values = a->getRange(ndx, ndx2);
@@ -140,7 +140,7 @@ PyObject* JPypeJavaArray::setArraySlice(PyObject* self, PyObject* arg)
 		int ndx = -1;
 		int ndx2 = -1;
 		PyObject* val;
-		JPyArg::parseTuple(arg, "O!iiO", &PyCObject_Type, &arrayObject, &ndx, &ndx2, &val);
+		JPyArg::parseTuple(arg, "O!iiO", &PyCapsule_Type, &arrayObject, &ndx, &ndx2, &val);
 		JPArray* a = (JPArray*)JPyCObject::asVoidPtr(arrayObject);
 
 		Py_ssize_t len = JPyObject::length(val);
@@ -169,7 +169,7 @@ PyObject* JPypeJavaArray::setArrayItem(PyObject* self, PyObject* arg)
 		PyObject* arrayObject;
 		int ndx;
 		PyObject* value;
-		JPyArg::parseTuple(arg, "O!iO", &PyCObject_Type, &arrayObject, &ndx, &value);
+		JPyArg::parseTuple(arg, "O!iO", &PyCapsule_Type, &arrayObject, &ndx, &value);
 		JPArray* a = (JPArray*)JPyCObject::asVoidPtr(arrayObject);
 
 		JPCleaner cleaner;
@@ -190,11 +190,12 @@ PyObject* JPypeJavaArray::newArray(PyObject* self, PyObject* arg)
 	try {
 		PyObject* arrayObject;
 		int sz;
-		JPyArg::parseTuple(arg, "O!i", &PyCObject_Type, &arrayObject, &sz);
+		JPyArg::parseTuple(arg, "O!i", &PyCapsule_Type, &arrayObject, &sz);
 		JPArrayClass* a = (JPArrayClass*)JPyCObject::asVoidPtr(arrayObject);
 
 		JPArray* v = a->newInstance(sz);
-		PyObject* res = JPyCObject::fromVoidAndDesc(v, (void*)"JPArray", PythonHostEnvironment::deleteJPArrayDestructor);
+		PyObject* res = JPyCObject::fromVoidAndDesc(v, "JPArray",
+				PythonHostEnvironment::deleteJPArrayDestructor);
 
 		return res;
 	}
@@ -208,7 +209,7 @@ PyObject* JPypeJavaArray::setArrayValues(PyObject* self, PyObject* arg)
 	try {
 		PyObject* arrayObject;
 		PyObject* values;
-		JPyArg::parseTuple(arg, "O!O", &PyCObject_Type, &arrayObject, &values);
+		JPyArg::parseTuple(arg, "O!O", &PyCapsule_Type, &arrayObject, &values);
 		JPArray* a = (JPArray*)JPyCObject::asVoidPtr(arrayObject);
 		JPArrayClass* arrayClass = a->getClass();
 		HostRef valuesRef(values);

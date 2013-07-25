@@ -35,6 +35,7 @@ public :
 
 	virtual ~PythonException();
 	
+	virtual string getMessage();
 	
 	bool isJavaException();
 	PyObject* getJavaException();
@@ -42,7 +43,6 @@ public :
 public :
 	PyObject* m_ExceptionClass;
 	PyObject* m_ExceptionValue;
-	
 };
 
 /** 
@@ -116,7 +116,7 @@ class JPyString : public JPythonEnvHelper
 {
 public :
 	static bool check(PyObject* obj);
-	static bool checkStrict(PyObject*);
+	static bool checkBytes(PyObject*);
 	static bool checkUnicode(PyObject*);
 	static string asString(PyObject* obj);
 	static JCharString asJCharString(PyObject* obj);
@@ -216,10 +216,10 @@ class JPyCObject : public JPythonEnvHelper
 {
 public :
 	static bool check(PyObject* obj);
-	static PyObject* fromVoid(void* data, void (*destr)(void *));
-	static PyObject* fromVoidAndDesc(void* data, void* desc, void (*destr)(void *, void*));
+	static PyObject* fromVoid(void* data, void (*destr)(PyObject*));
+	static PyObject* fromVoidAndDesc(void* data, const char* desc, void (*destr)(PyObject*));
 	static void* asVoidPtr(PyObject*);
-	static void* getDesc(PyObject*);
+	static const char* getDesc(PyObject*);
 };
 
 class JPyType : public JPythonEnvHelper
@@ -245,7 +245,7 @@ catch(JavaException* ex) \
 	} \
 	catch(...) \
 	{ \
-		JPEnv::getHost()->setRuntimeException("An unknown error occured while handling a Java Exception"); \
+		JPEnv::getHost()->setRuntimeException("An unknown error occurred while handling a Java Exception"); \
 	}\
 	delete ex; \
 }\
@@ -256,7 +256,7 @@ catch(JPypeException* ex)\
 	} \
 	catch(...) \
 	{ \
-		JPEnv::getHost()->setRuntimeException("An unknown error occured while handling a JPype Exception"); \
+		JPEnv::getHost()->setRuntimeException("An unknown error occurred while handling a JPype Exception"); \
 	}\
 	delete ex; \
 }\
@@ -273,35 +273,35 @@ catch(...) \
 catch(JavaException* ex) \
 { \
 	try { \
-	cout << "Java error occured : " << ex->message << endl; \
+	cout << "Java error occurred : " << ex->message << endl; \
 		JPypeJavaException::errorOccurred(); \
 	} \
 	catch(...) \
 	{ \
-		JPEnv::getHost()->setRuntimeException("An unknown error occured while handling a Java Exception"); \
+		JPEnv::getHost()->setRuntimeException("An unknown error occurred while handling a Java Exception"); \
 	}\
 	delete ex; \
 }\
 catch(JPypeException* ex)\
 {\
 	try { \
-		cout << "JPype error occured" << endl; \
+		cout << "JPype error occurred" << endl; \
 		JPEnv::getHost()->setRuntimeException(ex->getMsg()); \
 	} \
 	catch(...) \
 	{ \
-		JPEnv::getHost()->setRuntimeException("An unknown error occured while handling a JPype Exception"); \
+		JPEnv::getHost()->setRuntimeException("An unknown error occurred while handling a JPype Exception"); \
 	}\
 	delete ex; \
 }\
 catch(PythonException* ex) \
 { \
-	cout << "Pyhton error occured" << endl; \
+	cout << "Python error occurred" << endl; \
 	delete ex; \
 } \
 catch(...) \
 {\
-	cout << "Unknown error occured" << endl; \
+	cout << "Unknown error occurred" << endl; \
 	JPEnv::getHost()->setRuntimeException("Unknown Exception"); \
 } \
 

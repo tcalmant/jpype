@@ -26,7 +26,7 @@ PyObject* JPypeJavaNio::convertToDirectBuffer(PyObject* self, PyObject* args)
 	JPyArg::parseTuple(args, "O", &src);
 
 	PyObject* res = NULL;
-	if (JPyString::checkStrict(src))
+	if (JPyString::checkBytes(src))
 	{
 		// converts to byte buffer ...
 		JPTypeName tname = JPTypeName::fromType(JPTypeName::_byte);

@@ -85,11 +85,11 @@ PyObject* convertToJValue(PyObject* self, PyObject* arg)
 		PyObject* res;
 		if (type->isObjectType())
 		{
-			res = JPyCObject::fromVoidAndDesc((void*)pv, (void*)"object jvalue", PythonHostEnvironment::deleteObjectJValueDestructor);
+			res = JPyCObject::fromVoidAndDesc((void*)pv, "object jvalue", PythonHostEnvironment::deleteObjectJValueDestructor);
 		}
 		else
 		{
-			res = JPyCObject::fromVoidAndDesc((void*)pv, (void*)"jvalue", PythonHostEnvironment::deleteJValueDestructor);
+			res = JPyCObject::fromVoidAndDesc((void*)pv, "jvalue", PythonHostEnvironment::deleteJValueDestructor);
 		}
 
 		return res;
@@ -128,7 +128,7 @@ PyObject* JPypeJavaProxy::createProxy(PyObject*, PyObject* arg)
 
 		JPProxy* proxy = new JPProxy(&ref, interfaces);
 
-		PyObject* res = JPyCObject::fromVoidAndDesc(proxy, (void*)"jproxy", PythonHostEnvironment::deleteJPProxyDestructor);
+		PyObject* res = JPyCObject::fromVoidAndDesc(proxy, "jproxy", PythonHostEnvironment::deleteJPProxyDestructor);
 
 		return res;
 	}
@@ -203,12 +203,22 @@ static PyMethodDef jpype_methods[] =
   {NULL}
 };
 
-PyMODINIT_FUNC init_jpype()
+PyMODINIT_FUNC PyInit__jpype(void)
 {
 	Py_Initialize();
 	PyEval_InitThreads();
+
+	static struct PyModuleDef moduledef = {
+			PyModuleDef_HEAD_INIT,
+
+			"_jpype",							/* m_name */
+			"jPype: Java <-> Python wrapper",	/* m_doc */
+			-1,									/* m_size */
+			jpype_methods,						/* m_methods */
+			/* Default values ... */
+	};
 	  
-	PyObject* module = Py_InitModule("_jpype", jpype_methods);  
+	PyObject* module = PyModule_Create(&moduledef);
 	Py_INCREF(module);
 	hostEnv = new PythonHostEnvironment();
 	  
@@ -218,7 +228,9 @@ PyMODINIT_FUNC init_jpype()
 	PyJPMethod::initType(module);	
 	PyJPBoundMethod::initType(module);	
 	PyJPClass::initType(module);	
-	PyJPField::initType(module);	
+	PyJPField::initType(module);
+
+	return module;
 }
 
 PyObject* detachRef(HostRef* ref)
@@ -229,7 +241,6 @@ PyObject* detachRef(HostRef* ref)
 	ref->release();
 
 	return data;
-
 }
 
 void JPypeJavaException::errorOccurred()

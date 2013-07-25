@@ -16,16 +16,16 @@
 *****************************************************************************/   
 #include <jpype_python.h>
 
-#define PY_CHECK(op) op; { PyObject* __ex = PyErr_Occurred(); if (__ex) { 	throw new PythonException(); }};
+#define PY_CHECK(op) op; { PyObject* __ex = PyErr_Occurred(); if (__ex) { throw new PythonException(); }};
 
 bool JPyString::check(PyObject* obj)
 {
-	return PyString_Check(obj) || PyUnicode_Check(obj);
+	return PyBytes_Check(obj) || PyUnicode_Check(obj);
 }
 
-bool JPyString::checkStrict(PyObject* obj)
+bool JPyString::checkBytes(PyObject* obj)
 {
-	return PyString_Check(obj);
+	return PyBytes_Check(obj);
 }
 
 bool JPyString::checkUnicode(PyObject* obj)
@@ -41,7 +41,22 @@ Py_UNICODE* JPyString::AsUnicode(PyObject* obj)
 string JPyString::asString(PyObject* obj) 
 {	
 	TRACE_IN("JPyString::asString");
-	PY_CHECK( string res = string(PyString_AsString(obj)) );
+
+	PyObject* val;
+	bool needs_decref = false;
+	if(PyUnicode_Check(obj)) {
+		 val = PyUnicode_AsEncodedString(obj, "UTF-8", "strict");
+		 needs_decref = true;
+	} else {
+		val = obj;
+	}
+
+	PY_CHECK( string res = string(PyBytes_AsString(val)) );
+
+	if(needs_decref) {
+		Py_DECREF(val);
+	}
+
 	return res;
 	TRACE_OUT;
 }
@@ -51,7 +66,7 @@ JCharString JPyString::asJCharString(PyObject* obj)
 	PyObject* torelease = NULL;
 	TRACE_IN("JPyString::asJCharString");
 	
-	if (PyString_Check(obj))
+	if (PyBytes_Check(obj))
 	{
 		PY_CHECK( obj = PyUnicode_FromObject(obj) );	
 		torelease = obj;
@@ -89,14 +104,16 @@ PyObject* JPyString::fromUnicode(const jchar* str, int len)
 
 PyObject* JPyString::fromString(const char* str) 
 {
-	PY_CHECK( PyObject* obj = PyString_FromString(str) );
-	return obj;
+	PY_CHECK( PyObject* bytes = PyBytes_FromString(str) );
+	PY_CHECK( PyObject* unicode = PyUnicode_FromEncodedObject(bytes, "UTF-8", "strict") );
+	Py_DECREF(bytes);
+	return unicode;
 }
 
 
 Py_ssize_t JPyString::AsStringAndSize(PyObject *obj, char **buffer, Py_ssize_t *length)
 {	
-	PY_CHECK( Py_ssize_t res = PyString_AsStringAndSize(obj, buffer, length) );
+	PY_CHECK( Py_ssize_t res = PyBytes_AsStringAndSize(obj, buffer, length) );
 	return res;
 }
 
@@ -217,19 +234,19 @@ void JPyErr::setObject(PyObject* exClass, PyObject* str)
 PyObject* JPyInt::fromLong(long l)
 {
 	TRACE_IN("JPyInt::fromLong");
-	PY_CHECK( PyObject* res = PyInt_FromLong(l) );
+	PY_CHECK( PyObject* res = PyLong_FromLong(l) );
 	return res; 
 	TRACE_OUT;
 }
 
 bool JPyInt::check(PyObject* obj)
 {
-	return PyInt_Check(obj);
+	return PyLong_Check(obj);
 }
 
 long JPyInt::asLong(PyObject* obj)
 {
-	return PyInt_AsLong(obj);
+	return PyLong_AsLong(obj);
 }
 
 PyObject* JPyLong::fromLongLong(PY_LONG_LONG l)
@@ -268,12 +285,12 @@ double JPyFloat::asDouble(PyObject* obj)
 
 PyObject* JPyBoolean::getTrue()
 {
-	return PyInt_FromLong(1);
+	return PyBool_FromLong(1);
 }
 
 PyObject* JPyBoolean::getFalse()
 {
-	return PyInt_FromLong(0);
+	return PyBool_FromLong(0);
 }
 
 bool JPyDict::contains(PyObject* m, PyObject* k)
@@ -322,8 +339,9 @@ void JPyDict::setItemString(PyObject* d, PyObject* o, const char* n)
 PythonException::PythonException()
 {
 	TRACE_IN("PythonException::PythonException");
-	PyObject* traceback;
-	PyErr_Fetch(&m_ExceptionClass, &m_ExceptionValue, &traceback);
+	PyObject* excTraceback;
+	PyErr_Fetch(&m_ExceptionClass, &m_ExceptionValue, &excTraceback);
+	PyErr_NormalizeException(&m_ExceptionClass, &m_ExceptionValue, &excTraceback);
 	Py_INCREF(m_ExceptionClass);
 	Py_INCREF(m_ExceptionValue);
 
@@ -338,7 +356,7 @@ PythonException::PythonException()
 
 	}
 
-	PyErr_Restore(m_ExceptionClass, m_ExceptionValue, traceback);
+	PyErr_Restore(m_ExceptionClass, m_ExceptionValue, excTraceback);
 	TRACE_OUT;
 }
 
@@ -354,6 +372,30 @@ PythonException::~PythonException()
 {
 	Py_XDECREF(m_ExceptionClass);
 	Py_XDECREF(m_ExceptionValue);
+}
+
+string PythonException::getMessage()
+{
+	string message = "";
+
+	// Exception class name
+	PyObject* className = JPyObject::getAttrString(m_ExceptionClass, "__name__");
+	message += JPyString::asString(className);
+	Py_DECREF(className);
+
+	// Exception value
+	if(m_ExceptionValue)
+	{
+		// Convert the exception value to string
+		PyObject* pyStrValue = PyObject_Str(m_ExceptionValue);
+		if(pyStrValue)
+		{
+			message += ": " + JPyString::asString(pyStrValue);
+			Py_DECREF(pyStrValue);
+		}
+	}
+
+	return message;
 }
 
 PyObject* PythonException::getJavaException()
@@ -393,33 +435,33 @@ PyObject* PythonException::getJavaException()
 	return retVal;
 }
 
-PyObject* JPyCObject::fromVoid(void* data, void (*destr)(void *))
+PyObject* JPyCObject::fromVoid(void* data, void (*destr)(PyObject*))
 {
-	PY_CHECK( PyObject* res = PyCObject_FromVoidPtr(data, destr) );
+	PY_CHECK( PyObject* res = PyCapsule_New(data, 0, destr) );
 	return res;
 }
 
-PyObject* JPyCObject::fromVoidAndDesc(void* data, void* desc, void (*destr)(void *, void*))
+PyObject* JPyCObject::fromVoidAndDesc(void* data, const char* desc, void (*destr)(PyObject*))
 {
-	PY_CHECK( PyObject* res = PyCObject_FromVoidPtrAndDesc(data, desc, destr) );
+	PY_CHECK( PyObject* res = PyCapsule_New(data, desc, destr) );
 	return res;
 }
 
 void* JPyCObject::asVoidPtr(PyObject* obj)
 {
-	PY_CHECK( void* res = PyCObject_AsVoidPtr(obj) );
+	PY_CHECK( void* res = PyCapsule_GetPointer(obj, PyCapsule_GetName(obj)) );
 	return res;
 }
 
-void* JPyCObject::getDesc(PyObject* obj)
+const char* JPyCObject::getDesc(PyObject* obj)
 {
-	PY_CHECK( void* res = PyCObject_GetDesc(obj) );
+	PY_CHECK( const char* res = PyCapsule_GetName(obj) );
 	return res;
 }
 
 bool JPyCObject::check(PyObject* obj)
 {
-	return PyCObject_Check(obj);
+	return PyCapsule_CheckExact(obj);
 }
 
 bool JPyType::check(PyObject* obj)
