@@ -12,23 +12,23 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
 
-import _winreg
+import winreg
 
 def getDefaultJVMPath() :
     try :
-        jreKey = _winreg.OpenKey(_winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\JavaSoft\Java Runtime Environment")
-        cv = _winreg.QueryValueEx(jreKey, "CurrentVersion")
-        versionKey = _winreg.OpenKey(jreKey, cv[0])
-        _winreg.CloseKey(jreKey)
-       
-        cv = _winreg.QueryValueEx(versionKey, "RuntimeLib")
-        _winreg.CloseKey(versionKey)
-        
+        jreKey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\JavaSoft\Java Runtime Environment")
+        cv = winreg.QueryValueEx(jreKey, "CurrentVersion")
+        versionKey = winreg.OpenKey(jreKey, cv[0])
+        winreg.CloseKey(jreKey)
+
+        cv = winreg.QueryValueEx(versionKey, "RuntimeLib")
+        winreg.CloseKey(versionKey)
+
         return cv[0]
-    except WindowsError, ex :
+    except WindowsError:
         pass
-        
+
     return None

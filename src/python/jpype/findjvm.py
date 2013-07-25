@@ -12,9 +12,9 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
 import jpype, os.path
 
 jvmlib = jpype.getDefaultJVMPath()
-print os.path.dirname(os.path.dirname(jvmlib))
+print("JVM: {0}".format(os.path.dirname(os.path.dirname(jvmlib))))

@@ -15,9 +15,7 @@
 #
 #*****************************************************************************
 import _jpype
-import _jexception
-import _jcollection
-from _pykeywords import KEYWORDS
+from ._pykeywords import KEYWORDS
 
 
 _CLASSES = {}
@@ -39,7 +37,6 @@ _COMPARABLE_METHODS = {
 def _initialize():
     global _COMPARABLE, _JAVAOBJECT, _JAVATHROWABLE, _RUNTIMEEXCEPTION
 
-    import _jpackage
     _JAVAOBJECT = JClass("java.lang.Object")
     _JAVATHROWABLE = JClass("java.lang.Throwable")
     _RUNTIMEEXCEPTION = JClass("java.lang.RuntimeException")
@@ -90,7 +87,7 @@ def _javaInit(self, *args):
 def _javaGetAttr(self, name):
     try:
         r = object.__getattribute__(self, name)
-    except AttributeError, ex:
+    except AttributeError as ex:
         if name in dir(self.__class__.__metaclass__):
             r = object.__getattribute__(self.__class__, name)
         else:
@@ -102,12 +99,11 @@ def _javaGetAttr(self, name):
 
 
 class _JavaClass(type):
-    def __new__(mcs, jc):
+    def __new__(cls, jc):
         bases = []
         name = jc.getName()
 
         static_fields = {}
-        constants = []
         members = {
                 "__javaclass__": jc,
                 "__init__": _javaInit,
@@ -125,6 +121,7 @@ class _JavaClass(type):
             bases.append(_getClassFor(bjc))
 
         if _JAVATHROWABLE is not None and jc.isSubclass("java.lang.Throwable"):
+            from . import _jexception
             members["PYEXC"] = _jexception._makePythonException(name, bjc)
 
         itf = jc.getBaseInterfaces()
@@ -142,16 +139,16 @@ class _JavaClass(type):
                 fname = fname + "_"
 
             if i.isStatic():
-                g = lambda self, fld=i: fld.getStaticAttribute()
+                g = lambda self, fld = i: fld.getStaticAttribute()
                 s = None
                 if not i.isFinal():
-                    s = lambda self, v, fld=i: fld.setStaticAttribute(v)
+                    s = lambda self, v, fld = i: fld.setStaticAttribute(v)
                 static_fields[fname] = property(g, s)
             else:
-                g = lambda self, fld=i: fld.getInstanceAttribute(self.__javaobject__)
+                g = lambda self, fld = i: fld.getInstanceAttribute(self.__javaobject__)
                 s = None
                 if not i.isFinal():
-                    s = lambda self, v, fld=i: fld.setInstanceAttribute(self.__javaobject__, v)
+                    s = lambda self, v, fld = i: fld.setInstanceAttribute(self.__javaobject__, v)
                 members[fname] = property(g, s)
 
         # methods
@@ -183,7 +180,7 @@ class _JavaClass(type):
         meta_bases = []
         for i in bases:
             if i is object:
-                meta_bases.append(mcs)
+                meta_bases.append(cls)
             else:
                 meta_bases.append(i.__metaclass__)
 

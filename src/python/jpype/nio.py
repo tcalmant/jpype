@@ -12,15 +12,13 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
-import array
 import _jpype
 
 def _initialize() :
     pass
 
 def convertToDirectBuffer(obj):
-    __doc__ = '''Efficiently convert all array.array types, string and unicode to java.nio.Buffer objects.'''
-    
+    '''Efficiently convert all array.array types, string and unicode to java.nio.Buffer objects.'''
     return _jpype.convertToDirectBuffer(obj)

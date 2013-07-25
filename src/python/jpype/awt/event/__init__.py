@@ -14,5 +14,5 @@
 #   limitations under the License.
 #   
 #*****************************************************************************
-from WindowAdapter import *
+from .WindowAdapter import *
 

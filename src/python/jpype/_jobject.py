@@ -14,7 +14,7 @@
 #   limitations under the License.
 #   
 #*****************************************************************************
-import _jclass
+from . import _jclass
 
 def _initialize() :
 	_jclass.registerClassCustomizer(ComparableCustomizer())

@@ -12,12 +12,11 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
 import sys
-import _core
-import _jproxy
-import _jclass
+from . import _jproxy
+from . import _jclass
 
 def setupGuiEnvironment(cb):
 	if sys.platform == 'darwin' :
@@ -29,12 +28,8 @@ def setupGuiEnvironment(cb):
 		AppHelper.runConsoleEventLoop()
 	else:
 		cb()
-		
+
 def shutdownGuiEnvironment() :
 	if sys.platform == 'darwin' :
 		from PyObjCTools import AppHelper
 		AppHelper.stopEventLoop()
-	
-
-
-		

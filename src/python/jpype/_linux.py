@@ -16,8 +16,6 @@
 #*****************************************************************************
 import os
 import re
-import shlex
-import subprocess
 
 
 _KNOWN_LOCATIONS = [
@@ -30,33 +28,90 @@ JRE_ARCHS = ["amd64/server/libjvm.so",
              "i386/client/libjvm.so",
              "i386/server/libjvm.so", ]
 
+def filter_homes(homes):
+    """
+    Filters the given possible Java home folders: the last part of the name
+    must contain 'java', 'jre' or 'jdk'.
+    
+    :param homes: A list of homes
+    :return: A generator filtering the given homes
+    """
+    for home in homes:
+        # Only accept directories
+        if not os.path.isdir(home):
+            continue
+
+        # Use lower-case for comparisons
+        folder = os.path.dirname(home).lower()
+        if not folder:
+            # Invalid folder name
+            continue
+
+        # Filter names
+        for java_name in ('jre', 'jdk', 'java'):
+            if java_name in folder:
+                # Seems to be a good name
+                break
+        else:
+            # Doesn't seem to be a valid JVM installation
+            continue
+
+        # Yield the current folder
+        yield home
+
+
+def find_libjvm(java_home):
+    """
+    Recursively looks for the given file
+    
+    :param java_home: A JVM home folder
+    :return: The first found file path, or None
+    """
+    # Look for the file
+    filename = "libjvm.so"
+
+    for root, _, names in os.walk(java_home):
+        if filename in names:
+            # Found it
+            return os.path.join(root, filename)
+
+    else:
+        # File not found
+        return None
+
 
 def getDefaultJVMPath():
     jvm = _getJVMFromJavaHome()
     if jvm is not None:
         return jvm
 
-    #on linux, the JVM has to be in the LD_LIBRARY_PATH anyway, so might as well inspect it first
+    # on Linux, the JVM has to be in the LD_LIBRARY_PATH anyway,
+    # so might as well inspect it first
     jvm = _getJVMFromLibPath()
     if jvm is not None:
         return jvm
 
     # failing that, lets look in the "known" locations
-    for i in _KNOWN_LOCATIONS:
-        # TODO
-        pass
+    for parent in _KNOWN_LOCATIONS:
+        # Get all children
+        children = map(lambda x: os.path.join(parent, x), os.listdir(parent))
 
-    return "/usr/java/jre1.5.0_05/lib/i386/client/libjvm.so"
+        for home in filter_homes(children):
+            jvm = find_libjvm(home)
+            if jvm is not None:
+                return jvm
+
+    # Not found
+    raise ValueError("No libjvm.so file found. Try setting up the JAVA_HOME "
+                     "environment variable properly.")
 
 
 def _getJVMFromJavaHome():
     java_home = os.getenv("JAVA_HOME")
-    if java_home is None:
+    if not java_home:
         try:
-            # Need to use Popen since check_output is only supported in py2.7+
-            java_home = subprocess.Popen(shlex.split('readlink -f /usr/bin/java'),
-                                        stdout=subprocess.PIPE
-                                ).communicate()[0].strip().replace('bin/java', '')
+            # Look for the real installation path
+            java_home = os.path.realpath('/usr/bin/java').replace('bin/java', '')
         except:  # I know. catchall is bad...
             # Avoid NoneType + String
             java_home = ''
