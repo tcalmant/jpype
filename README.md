@@ -37,7 +37,7 @@ Installation
 
 Easy as
 
-    python setup.py install
+    python3 setup.py install
 
 :+1:
 
