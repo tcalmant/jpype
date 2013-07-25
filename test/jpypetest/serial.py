@@ -12,15 +12,15 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
-from jpype import JException, java, JavaException, JProxy, JClass
-import unittest, common
-import traceback
+from jpype import java, JClass
+import unittest
+from . import common
 
 def suite() :
     return unittest.makeSuite(SerializationTestCase)
-    
+
 class SerializationTestCase(common.JPypeTestCase) :
     def testSerialize(self) :
         o = JClass("jpype.serial.SerializationTest")()
@@ -28,18 +28,16 @@ class SerializationTestCase(common.JPypeTestCase) :
         oos = java.io.ObjectOutputStream(fos)
         oos.writeObject(o)
         oos.flush()
-        oos.close()       
-        fos.close() 
-        
-       
-# The following cannto work because JPype has no way to simulate the "caller's ClassLoader" 
+        oos.close()
+        fos.close()
+
+
+# The following cannto work because JPype has no way to simulate the "caller's ClassLoader"
 #    def testDeSerialize(self) :
-#        
+#
 #        fis = java.io.FileInputStream("testSerial.dat")
 #        ois = java.io.ObjectInputStream(fis)
-#        
+#
 #        o = ois.readObject()
 #        ois.close()
 #        fis.close()
-        
-        

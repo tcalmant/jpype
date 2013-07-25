@@ -12,10 +12,11 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
-from jpype import *
-import unittest, common
+from jpype import JPackage, JProxy
+import unittest
+from . import common
 
 def suite() :
     return unittest.makeSuite(ProxyTestCase)
@@ -29,15 +30,15 @@ def _testMethod2() :
 class C :
     def testMethod(self) :
         return 42
-        
+
     def testMethod2(self) :
-        return "Bar"            
+        return "Bar"
 
     def write(self, bytes, start, length) :
-    	print 'aaaaa'
-    	print bytes.__class__, bytes[0]
-    	print start
-    	print length         
+        print('aaaaa')
+        print(bytes.__class__, bytes[0])
+        print(start)
+        print(length)
 
 class ProxyTestCase(common.JPypeTestCase) :
     def testProxyWithDict(self) :
@@ -48,7 +49,7 @@ class ProxyTestCase(common.JPypeTestCase) :
         itf2 = JPackage("jpype.proxy").ITestInterface3
         Test3 = JPackage("jpype.proxy").Test3
         proxy = JProxy(itf2, dict=d)
-    
+
         Test3.testProxy(proxy)
 
     def testProxyWithInst(self) :
@@ -57,7 +58,7 @@ class ProxyTestCase(common.JPypeTestCase) :
 
         c = C()
         proxy = JProxy(itf2, inst=c)
-        Test3.testProxy(proxy)   
+        Test3.testProxy(proxy)
 
     def testProxyWithThread(self) :
         itf2 = JPackage("jpype.proxy").ITestInterface3
@@ -69,19 +70,19 @@ class ProxyTestCase(common.JPypeTestCase) :
         t3 = Test3()
         t3.testProxyWithThread(proxy)
 
-	def testProxyWithArguments(self) :
-		itf2 = JPackage("jpype.proxy").ITestInterface2		   
-		Test3 = JPackage("jpype.proxy").Test3
-
-		c = C()
-		proxy = JProxy(itf2, inst=c)
-		Test3().testCallbackWithParameters(proxy)
-        
-    def testProxyWithMultipleInterface(self) :
-        itf2 = JPackage("jpype.proxy").ITestInterface2           
-        itf3 = JPackage("jpype.proxy").ITestInterface3           
+    def testProxyWithArguments(self) :
+        itf2 = JPackage("jpype.proxy").ITestInterface2
         Test3 = JPackage("jpype.proxy").Test3
 
         c = C()
-        proxy = JProxy([itf2,itf3], inst=c)
-        Test3().testCallbackWithParameters(proxy)        
+        proxy = JProxy(itf2, inst=c)
+        Test3().testCallbackWithParameters(proxy)
+
+    def testProxyWithMultipleInterface(self) :
+        itf2 = JPackage("jpype.proxy").ITestInterface2
+        itf3 = JPackage("jpype.proxy").ITestInterface3
+        Test3 = JPackage("jpype.proxy").Test3
+
+        c = C()
+        proxy = JProxy([itf2, itf3], inst=c)
+        Test3().testCallbackWithParameters(proxy)

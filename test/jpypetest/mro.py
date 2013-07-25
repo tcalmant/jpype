@@ -12,14 +12,15 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
-from jpype import JPackage, java
-import unittest, common, sys
+from jpype import JPackage
+import unittest
+from . import common
 
 def suite() :
     return unittest.makeSuite(MroTestCase)
-    
+
 class MroTestCase(common.JPypeTestCase) :
-	def testMro(self) :
-		C = JPackage('jpype.mro').C
+    def testMro(self) :
+        C = JPackage('jpype.mro').C

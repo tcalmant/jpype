@@ -12,10 +12,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
 
-from jpype import *
+from jpype import JPackage
 import unittest
 
 CLASSPATH = None
@@ -23,8 +23,6 @@ CLASSPATH = None
 class JPypeTestCase(unittest.TestCase) :
     def setUp(self) :
         self.jpype = JPackage('jpype')
-        
+
     def tearDown(self) :
         pass
-        
-        
