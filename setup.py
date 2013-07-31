@@ -3,48 +3,53 @@
 import os
 import sys
 import platform
+from glob import glob
 
 try:
-    from setuptools import setup as distSetup
+    from setuptools import setup
     from setuptools import Extension
 
 except ImportError:
-    from distutils.core import setup as distSetup
+    from distutils.core import setup
     from distutils.core import Extension
 
+# ------------------------------------------------------------------------------
 
-class JPypeSetup(object):
+class NoJDKError(Exception):
     """
-    jPype setup utility class
+    No JDK found
     """
+    def __init__(self, possible_homes):
+        """
+        Sets up the exception message
+        """
+        Exception.__init__(self, "No JDK found")
 
+        # Normalize possible homes -> always give an iterable
+        if possible_homes is not None \
+        and not isinstance(possible_homes, (list, tuple)):
+            possible_homes = [possible_homes]
+
+        self.possible_homes = possible_homes
+
+
+class JDKFinder(object):
+    """
+    Base JDK installation finder
+    """
     def __init__(self):
         """
-        Sets up members
+        Sets up the basic configuration
         """
-        # C++ source files
-        self.cpp = []
-
-        # JDK home folder
-        self.javaHome = None
-
-        # JDK (extra) include folder
-        self.jdkInclude = None
-
-        # C++ libraries
-        self.libraries = []
-
-        # C++ libraries folders
-        self.libraryDir = []
-
-        # C++ compiler definitions
-        self.macros = []
-
-        # C++ compiler extra arguments
-        self.extra_compile_args = []
+        self.configuration = {
+          'include_dirs': [
+                           os.path.join('src', 'native', 'common', 'include'),
+                           os.path.join('src', 'native', 'python', 'include'),
+                           ],
+          'sources': self.find_sources()}
 
 
-    def setupFiles(self):
+    def find_sources(self):
         """
         Sets up the list of files to be compiled
         """
@@ -55,226 +60,344 @@ class JPypeSetup(object):
         # List all .cpp files in those folders
         cpp_files = []
         for folder in (common_dir, python_dir):
-            cpp_files.extend(os.path.join(folder, filename)
-                             for filename in os.listdir(folder)
-                             if os.path.splitext(filename)[1] == '.cpp')
+            for root, _, filenames in os.walk(folder):
+                cpp_files.extend(os.path.join(root, filename)
+                                 for filename in filenames
+                                 if os.path.splitext(filename)[1] == '.cpp')
 
-        self.cpp = cpp_files
+        return cpp_files
 
 
-    def setupWindows(self):
+    def find_jdk_home(self):
         """
-        Set up the compilation properties for Windows
-        """
-        # Use the JAVA_HOME environment variable
-        home = os.getenv("JAVA_HOME")
-        if not home:
-            print('Environment variable JAVA_HOME must be set')
-            sys.exit(-1)
-
-        # TODO: look in the Windows registry if needed
-
-        if not os.path.exists(home):
-            # Check if the path is valid
-            print('No JDK found at JAVA_HOME={0}'.format(home))
-            sys.exit(-1)
-
-        # Compiler configuration...
-        self.javaHome = home
-        self.jdkInclude = "win32"
-        self.libraries = ["Advapi32"]
-        self.libraryDir = [os.path.join(self.javaHome, "lib")]
-        self.macros = [("WIN32", 1)]
-        self.extra_compile_args = ['/EHsc']
-
-
-    def setupMacOSX(self):
-        """
-        Set up the compilation properties for Mac OS 10.6, 10.7 or 10.8 
-        """
-        # Changes according to:
-        # http://stackoverflow.com/questions/8525193/cannot-install-jpype-on-os-x-lion-to-use-with-neo4j
-        # and
-        # http://blog.y3xz.com/post/5037243230/installing-jpype-on-mac-os-x
-        osx = platform.mac_ver()[0][:4]
-        javaHome = '/Library/Java/Home'
-        if osx == '10.6':
-            # I'm not sure if this really works on all 10.6 - confirm please
-            # :)
-            javaHome = ('/Developer/SDKs/MacOSX10.6.sdk/System/Library/'
-                        'Frameworks/JavaVM.framework/Versions/1.6.0/')
-
-        elif osx in ('10.7', '10.8'):
-            javaHome = ('/System/Library/Frameworks/JavaVM.framework/'
-                        'Versions/Current/')
-
-        # Compiler configuration...
-        self.javaHome = javaHome
-        self.jdkInclude = ""
-        self.libraries = ["dl"]
-        self.libraryDir = [os.path.join(self.javaHome, "Libraries")]
-        self.macros = [('MACOSX', 1)]
-
-
-    def __find_jdk(self, parent):
-        """
-        Tries to find a JDK folder in the first-level children of the
-        given folder
+        Tries to locate a JDK home folder, according to the JAVA_HOME
+        environment variable
         
-        :param parent: A parent folder
-        :return: The first found JDK, or None
+        :return: The path to the JDK home
+        :raise NoJDKError: No JDK found
         """
-        for folder in os.listdir(parent):
-            # Construct the full path
-            java_home = os.path.join(parent, folder)
+        java_home = os.getenv("JAVA_HOME")
+        if self.check_jdk(java_home):
+            return java_home
 
-            # Lower-case content tests
-            folder = folder.lower()
+        raise NoJDKError(os.getenv("JAVA_HOME"))
 
-            # Consider it's a JDK if it has an 'include' folder
-            # and if the folder name contains 'jdk' or 'java'
-            if os.path.isdir(java_home) \
-            and ('jdk' in folder or 'java' in folder):
-                include_path = os.path.join(java_home, 'include')
-                if os.path.exists(include_path):
-                    # Match
-                    return java_home
+
+    def check_homes(self, homes):
+        """
+        Checks if one the given folders is a JDK home, and returns it
+        
+        :param homes: A list of possible JDK homes
+        :return: The first JDK home found
+        :raise NoJDKError: No JDK found
+        """
+        for java_home in homes:
+            java_home = os.path.realpath(java_home)
+            if self.check_jdk(java_home):
+                # Valid path
+                return java_home
+
+        else:
+            raise NoJDKError(homes)
+
+
+    def check_jdk(self, java_home):
+        """
+        Checks if the given folder can be a JDK installation
+        
+        :param java_home: A possible JDK installation
+        :return: The real folder path if it contains headers, else None
+        """
+        if not java_home:
+            return
+
+        # Possible JDK folder names
+        possible_names = ('jdk', 'java')
+
+        # Construct the full path
+        java_home = os.path.realpath(java_home)
+        if not os.path.isdir(java_home):
+            return
+
+        # Lower-case content tests
+        folder = os.path.basename(java_home).lower()
+
+        # Consider it's a JDK if it has an 'include' folder
+        # and if the folder name contains 'jdk' or 'java'
+        for name in possible_names:
+            if name in folder:
+                for include_name in ('include', 'Headers'):
+                    include_path = os.path.join(java_home, include_name)
+                    if os.path.exists(include_path):
+                        # Match
+                        return java_home
+
+# ------------------------------------------------------------------------------
+
+class WindowsJDKFinder(JDKFinder):
+    """
+    Windows specific JDK Finder
+    """
+    def __init__(self):
+        """
+        Sets up the basic configuration
+        
+        :raise ValueError: No JDK installation found
+        """
+        # Basic configuration
+        JDKFinder.__init__(self)
+        self.configuration['libraries'] = ['Advapi32']
+        self.configuration['define_macros'] = [('WIN32', 1)]
+        self.configuration['extra_compile_args'] = ['/EHsc']
+
+        # Look for the JDK home folder
+        java_home = self.find_jdk_home()
+
+        # Home-based configuration
+        self.configuration['library_dir'] = [os.path.join(java_home, 'lib'), ]
+        self.configuration['include_dirs'] += [
+            os.path.join(java_home, 'include'),
+            os.path.join(java_home, 'include', 'win32')
+        ]
+
+
+    def find_jdk_home(self):
+        """
+        Tries to locate a JDK home folder, according to the JAVA_HOME
+        environment variable, or to the Windows registry
+        
+        :return: The path to the JDK home
+        :raise ValueError: No JDK installation found
+        """
+        try:
+            java_home = JDKFinder.find_jdk_home(self)
+            # Found it
+            return java_home
+
+        except NoJDKError:
+            # Try from registry
+            java_home = self._get_from_registry()
+            if java_home and self.check_jdk(java_home):
+                return java_home
+
+            # Try with known locations
+            # 32 bits (or none on 32 bits OS) JDK
+            possible_homes = glob(os.path.join(os.environ['ProgramFiles(x86)'],
+                                               "Java", "*"))
+
+            # 64 bits (or 32 bits on 32 bits OS) JDK
+            possible_homes += glob(os.path.join(os.environ['ProgramFiles'],
+                                                "Java", "*"))
+
+            # Compute the real home folder
+            return self.check_homes(possible_homes)
+
+
+    def _get_from_registry(self):
+        """
+        Retrieves the path to the default Java installation stored in the
+        Windows registry
+        
+        :return: The path found in the registry, or None
+        """
+        import winreg
+        try:
+            jreKey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                                r"SOFTWARE\JavaSoft\Java Runtime Environment")
+            cv = winreg.QueryValueEx(jreKey, "CurrentVersion")
+            versionKey = winreg.OpenKey(jreKey, cv[0])
+            winreg.CloseKey(jreKey)
+
+            cv = winreg.QueryValueEx(versionKey, "RuntimeLib")
+            winreg.CloseKey(versionKey)
+
+            return cv[0]
+
+        except WindowsError:
+            pass
 
         return None
 
+# ------------------------------------------------------------------------------
 
-    def setupLinux(self):
+class DarwinJDKFinder(JDKFinder):
+    """
+    Mac OS X specific JDK Finder
+    """
+    def __init__(self):
         """
-        Sets up the compilation properties for Linux
+        Sets up the basic configuration
+        
+        :raise ValueError: No JDK installation found
         """
-        # Use the JAVA_HOME environment variable
-        home = os.getenv("JAVA_HOME")
-        if home:
-            # Validate the given Java home
-            include_path = os.path.join(home, 'include')
-            if not os.path.exists(include_path):
-                # Not a JDK...
-                print('WARNING: JAVA_HOME ({0}) does not point to a JDK. '
-                      'Looking for another one.'
-                      .format(home))
-                home = None
+        # Basic configuration
+        JDKFinder.__init__(self)
+        self.configuration['libraries'] = ['dl']
+        self.configuration['define_macros'] = [('MACOSX', 1)]
 
-        if not home:
-            # Known places where we might find a JDK
-            possible_install_dirs = ('/usr/lib/jvm', '/usr/java')
+        # Look for the JDK home folder
+        java_home = self.find_jdk_home()
 
-            for install in possible_install_dirs:
-                if os.path.isdir(install):
-                    home = self.__find_jdk(install)
-                    if home:
-                        # Match
-                        self.javaHome = home
-                        print('Using JDK at {0}'.format(home))
-                        break
-
-            else:
-                # No JDK found: Abandon
-                print("No Java/JDK could be found. I looked in the following "
-                      "directories:\n{0}\n"
-                      "Please check that you have a JDK installed.\n"
-                      "If you have and the destination is not in the above "
-                      "list please consider opening a ticket or creating a "
-                      "pull request on github: "
-                      "https://github.com/tcalmant/jpype/"
-                      .format('\n'.join(possible_install_dirs)))
-                sys.exit(1)
-
-        # Compiler configuration...
-        self.javaHome = home
-        self.jdkInclude = "linux"
-        self.libraries = ["dl"]
-        self.libraryDir = [os.path.join(self.javaHome, "lib")]
-
-
-    def setupPlatform(self):
-        """
-        Chooses the setup method to call according to the current platform
-        """
-        if sys.platform == 'win32':
-            self.setupWindows()
-
-        elif sys.platform == 'darwin':
-            self.setupMacOSX()
-
-        else:
-            self.setupLinux()
-
-
-    def setupInclusion(self):
-        """
-        Sets up the headers files folders
-        """
-        if sys.platform == 'darwin':
-            headerDirName = 'Headers'
-        else:
-            headerDirName = 'include'
-
-        self.includeDirs = [
-            os.path.join("src", "native", "common", "include"),
-            os.path.join("src", "native", "python", "include"),
-            os.path.join(self.javaHome, headerDirName)
+        # Home-based configuration
+        self.configuration['library_dir'] = [os.path.join(java_home,
+                                                          'Libraries')]
+        self.configuration['include_dirs'] += [
+            os.path.join(java_home, 'Headers'),
         ]
 
-        if self.jdkInclude:
-            # This one might be empty
-            self.includeDirs.append(os.path.join(self.javaHome, headerDirName,
-                                                 self.jdkInclude))
 
-
-    def setup(self):
+    def find_jdk_home(self):
         """
-        Package setup
+        Tries to locate a JDK home folder, according to the JAVA_HOME
+        environment variable, or to the Windows registry
+        
+        :return: The path to the JDK home
+        :raise ValueError: No JDK installation found
         """
-        # Look for C++ files
-        self.setupFiles()
+        try:
+            java_home = JDKFinder.find_jdk_home(self)
+            # Found it
+            return java_home
 
-        # Look for the JDK installation
-        self.setupPlatform()
+        except NoJDKError:
+            # Changes according to:
+            # http://stackoverflow.com/questions/8525193/cannot-install-jpype-on-os-x-lion-to-use-with-neo4j
+            # and
+            # http://blog.y3xz.com/post/5037243230/installing-jpype-on-mac-os-x
+            osx = platform.mac_ver()[0][:4]
 
-        # Set up C++ include folders
-        self.setupInclusion()
+            # Seems like the installation folder for Java 7
+            possible_homes = glob("/Library/Java/JavaVirtualMachines/*")
 
-        # Define the Python extension
-        jpypeLib = Extension("_jpype",
-                             self.cpp,
-                             libraries=self.libraries,
-                             define_macros=self.macros,
-                             include_dirs=self.includeDirs,
-                             library_dirs=self.libraryDir,
-                             extra_compile_args=self.extra_compile_args
-                             )
+            if osx in ('10.7', '10.8'):
+                # ... for Java 6
+                possible_homes.append('/System/Library/Frameworks/' \
+                                      'JavaVM.framework/Versions/Current/')
 
-        # Setup the package
-        distSetup(
-            name="JPype - Python 3",
-            version="0.5.5",
-            description="Python-Java bridge. Fork of the jPype project by "
-            "Steve Menard (http://jpype.sourceforge.net/), with the "
-            "modifications applied by Luis Nell "
-            "(https://github.com/originell/jpype)",
-            long_description=open("README.md").read(),
-            author="Thomas Calmant",
-            author_email="thomas.calmant@gmail.com",
-            url="http://github.com/tcalmant/jpype-py3/",
-            packages=[
-                "jpype", 'jpype.awt', 'jpype.awt.event',
-                'jpypex', 'jpypex.swing'],
-            package_dir={
-                "jpype": os.path.join("src", "python", "jpype"),
-                'jpypex': os.path.join("src", "python", "jpypex"),
-            },
-            ext_modules=[jpypeLib],
-            classifiers=[
-                'Intended Audience :: Developers',
-                'License :: OSI Approved :: Apache Software License',
-                'Programming Language :: Python :: 3'
-            ]
-        )
+            elif osx == '10.6':
+                # Previous Mac OS version
+                possible_homes.append('/Developer/SDKs/MacOSX10.6.sdk/System/' \
+                                      'Library/Frameworks/JavaVM.framework/' \
+                                      'Versions/1.6.0/')
 
-if __name__ == "__main__":
-    JPypeSetup().setup()
+            else:
+                # Other previous version
+                possible_homes.append('/Library/Java/Home')
+
+            # Compute the real home folder
+            return self.check_homes(possible_homes)
+
+# ------------------------------------------------------------------------------
+
+class LinuxJDKFinder(JDKFinder):
+    """
+    Linux specific JDK Finder
+    """
+    def __init__(self):
+        """
+        Sets up the basic configuration
+        
+        :raise ValueError: No JDK installation found
+        """
+        # Basic configuration
+        JDKFinder.__init__(self)
+        self.configuration['libraries'] = ['dl']
+
+        # Look for the JDK home folder
+        java_home = self.find_jdk_home()
+
+        # Home-based configuration
+        self.configuration['library_dir'] = [os.path.join(java_home, 'lib')]
+        self.configuration['include_dirs'] += [
+            os.path.join(java_home, 'include'),
+            os.path.join(java_home, 'include', 'linux'),
+        ]
+
+
+    def find_jdk_home(self):
+        """
+        Tries to locate a JDK home folder, according to the JAVA_HOME
+        environment variable, or to the Windows registry
+        
+        :return: The path to the JDK home
+        :raise ValueError: No JDK installation found
+        """
+        try:
+            java_home = JDKFinder.find_jdk_home(self)
+            # Found it
+            return java_home
+
+        except NoJDKError:
+            # (Almost) standard in GNU/Linux
+            possible_homes = glob('/usr/lib/jvm/*')
+
+            # Sun/Oracle Java in some cases
+            possible_homes += glob('/usr/java/*')
+
+            # Compute the real home folder
+            return self.check_homes(possible_homes)
+
+# ------------------------------------------------------------------------------
+
+try:
+    if sys.platform == 'win32':
+        config = WindowsJDKFinder()
+
+    elif sys.platform == 'darwin':
+        config = DarwinJDKFinder()
+
+    else:
+        config = LinuxJDKFinder()
+
+except NoJDKError as ex:
+    raise RuntimeError(
+                "No Java/JDK could be found. I looked in the following "
+                "directories: \n\n%s\n\nPlease check that you have it "
+                "installed.\n\nIf you have and the destination is not in the "
+                "above list, please find out where your java's home is, "
+                "set your JAVA_HOME environment variable to that path and "
+                "retry the installation.\n"
+                "If this still fails please open a ticket or create a "
+                "pull request with a fix on github: "
+                "https://github.com/tcalmant/jpype/"
+                % '\n'.join(ex.possible_homes))
+
+# ------------------------------------------------------------------------------
+
+# Define the Python extension
+jpypeLib = Extension(name="_jpype", **config.configuration)
+
+# Setup the package
+setup(
+    name="JPype - Python 3",
+    version="0.5.5",
+    description="Python-Java bridge. Fork of the jPype project by "
+    "Steve Menard (http://jpype.sourceforge.net/), with the "
+    "modifications applied by Luis Nell "
+    "(https://github.com/originell/jpype)",
+    long_description=open("README.md").read(),
+    license='License :: OSI Approved :: Apache Software License',
+    author="Thomas Calmant",
+    author_email="thomas.calmant@gmail.com",
+    url="http://github.com/tcalmant/jpype-py3/",
+    platforms=[
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows :: Windows 7',
+        'Operating System :: Microsoft :: Windows :: Windows Vista',
+        'Operating System :: POSIX :: Linux',
+    ],
+    classifiers=[
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: Apache Software License',
+        'Programming Language :: Java',
+        'Programming Language :: Python :: 3'
+    ],
+    packages=[
+        "jpype", 'jpype.awt', 'jpype.awt.event',
+        'jpypex', 'jpypex.swing'],
+    package_dir={
+        "jpype": os.path.join("src", "python", "jpype"),
+        'jpypex': os.path.join("src", "python", "jpypex"),
+    },
+    ext_modules=[jpypeLib],
+)
