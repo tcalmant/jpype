@@ -4,8 +4,13 @@ import os
 import sys
 import platform
 
-from distutils.core import setup as distSetup
-from distutils.core import Extension
+try:
+    from setuptools import setup as distSetup
+    from setuptools import Extension
+
+except ImportError:
+    from distutils.core import setup as distSetup
+    from distutils.core import Extension
 
 
 class JPypeSetup(object):
