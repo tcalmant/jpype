@@ -1,9 +1,11 @@
 # Python files
 __pycache__/
 *.pyc
+*.egg-info
 
 # Build directory
 build/
+dist/
 
 # Eclipse build directory
 Debug/
