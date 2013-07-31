@@ -15,20 +15,55 @@
 #
 #*****************************************************************************
 
+from . import _jvmfinder
 import winreg
 
-def getDefaultJVMPath() :
-    try :
-        jreKey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\JavaSoft\Java Runtime Environment")
-        cv = winreg.QueryValueEx(jreKey, "CurrentVersion")
-        versionKey = winreg.OpenKey(jreKey, cv[0])
-        winreg.CloseKey(jreKey)
+# ------------------------------------------------------------------------------
 
-        cv = winreg.QueryValueEx(versionKey, "RuntimeLib")
-        winreg.CloseKey(versionKey)
+class WindowsJVMFinder(_jvmfinder.JVMFinder):
+    """
+    Linux JVM library finder class
+    """
+    def __init__(self):
+        """
+        Sets up members
+        """
+        # Call the parent constructor
+        _jvmfinder.JVMFinder.__init__(self)
 
-        return cv[0]
-    except WindowsError:
-        pass
+        # Library file name
+        self._libfile = "jvm.dll"
 
-    return None
+        # Search methods
+        self._methods = (self._get_from_java_home,
+                         self._get_from_registry)
+
+
+    def _get_from_registry(self):
+        """
+        Retrieves the path to the default Java installation stored in the
+        Windows registry
+        
+        :return: The path found in the registry, or None
+        """
+        try :
+            jreKey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                                r"SOFTWARE\JavaSoft\Java Runtime Environment")
+            cv = winreg.QueryValueEx(jreKey, "CurrentVersion")
+            versionKey = winreg.OpenKey(jreKey, cv[0])
+            winreg.CloseKey(jreKey)
+
+            cv = winreg.QueryValueEx(versionKey, "RuntimeLib")
+            winreg.CloseKey(versionKey)
+
+            return cv[0]
+
+        except WindowsError:
+            pass
+
+        return None
+
+# ------------------------------------------------------------------------------
+
+# Alias
+JVMFinder = WindowsJVMFinder

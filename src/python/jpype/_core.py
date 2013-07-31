@@ -84,16 +84,28 @@ def attachThreadToJVM() :
 def detachThreadFromJVM() :
     _jpype.detachThreadFromJVM()
 
-def getDefaultJVMPath() :
+
+def get_default_jvm_path():
+    """
+    Retrieves the path to the default or first found JVM library
+
+    :return: The path to the JVM shared library file
+    :raise ValueError: No JVM library found
+    """
     if sys.platform == "win32" :
-        from . import _windows
-        return _windows.getDefaultJVMPath()
+        from ._windows import JVMFinder
+
     elif sys.platform == "darwin" :
-        from . import _darwin
-        return _darwin.getDefaultJVMPath()
+        from ._darwin import JVMFinder
+
     else:
-        from . import _linux
-        return _linux.getDefaultJVMPath()
+        from ._linux import JVMFinder
+
+    return JVMFinder().get_jvm_path()
+
+# Naming compatibility
+getDefaultJVMPath = get_default_jvm_path
+
 
 class ConversionConfigClass(object):
     def __init__(self):
