@@ -5,3 +5,7 @@ __pycache__/
 # Build directory
 build/
 
+# Eclipse build directory
+Debug/
+Release/
+
