@@ -14,62 +14,52 @@
 #   limitations under the License.
 #
 #*****************************************************************************
+
 import os
-import re
 
+# ------------------------------------------------------------------------------
 
-_KNOWN_LOCATIONS = [
-        ("/opt/sun/", re.compile(r"j2sdk(.+)/jre/lib/i386/client/libjvm.so")),
-        ("/usr/java/", re.compile(r"j2sdk(.+)/jre/lib/i386/client/libjvm.so")),
-        ("/usr/java/", re.compile(r"jdk(.+)/jre/lib/i386/client/libjvm.so")),
-]
+# Predefined locations on Linux
+PREDEFINED_LOCATIONS = ("/usr/lib/jvm",
+                        "/usr/java",
+                        "/opt/sun")
 
-JRE_ARCHS = ["amd64/server/libjvm.so",
-             "i386/client/libjvm.so",
-             "i386/server/libjvm.so", ]
+# ------------------------------------------------------------------------------
 
-def filter_homes(homes):
+def getDefaultJVMPath():
     """
-    Filters the given possible Java home folders: the last part of the name
-    must contain 'java', 'jre' or 'jdk'.
+    Retrieves the path to the JVM library (libjvm.so) according to:
     
-    :param homes: A list of homes
-    :return: A generator filtering the given homes
+    * the JAVA_HOME environment variable
+    * the /usr/bin/java executable real path
+    * the known locations (/usr/lib/jvm, /usr/java, ...)
+    
+    :return: The path to the libjvm.so file
+    :raise ValueError: No JVM library found
     """
-    for home in homes:
-        # Only accept directories
-        if not os.path.isdir(home):
-            continue
+    for method in (_getJVMFromJavaHome, _getJVMFromBin,
+                   _getJVMFromKnownLocations):
+        jvm = method()
+        if jvm is not None:
+            return jvm
 
-        # Use lower-case for comparisons
-        folder = os.path.dirname(home).lower()
-        if not folder:
-            # Invalid folder name
-            continue
+    else:
+        # Not found
+        raise ValueError("No libjvm.so file found. "
+                         "Try setting up the JAVA_HOME environment variable "
+                         "properly.")
 
-        # Filter names
-        for java_name in ('jre', 'jdk', 'java'):
-            if java_name in folder:
-                # Seems to be a good name
-                break
-        else:
-            # Doesn't seem to be a valid JVM installation
-            continue
+# ------------------------------------------------------------------------------
 
-        # Yield the current folder
-        yield home
-
-
-def find_libjvm(java_home):
+def _find_libjvm(java_home, filename="libjvm.so"):
     """
     Recursively looks for the given file
     
     :param java_home: A JVM home folder
+    :param filename: Name of the file to find
     :return: The first found file path, or None
     """
     # Look for the file
-    filename = "libjvm.so"
-
     for root, _, names in os.walk(java_home):
         if filename in names:
             # Found it
@@ -80,69 +70,75 @@ def find_libjvm(java_home):
         return None
 
 
-def getDefaultJVMPath():
-    jvm = _getJVMFromJavaHome()
-    if jvm is not None:
-        return jvm
+def _find_possible_homes(parents):
+    """
+    Generator that looks for the first-level children folders that could be JVM
+    installations, according to their name
+    
+    :param parents: A list of parent directories
+    :return: The possible JVM installation folders
+    """
+    homes = []
+    java_names = ('jre', 'jdk', 'java')
 
-    # on Linux, the JVM has to be in the LD_LIBRARY_PATH anyway,
-    # so might as well inspect it first
-    jvm = _getJVMFromLibPath()
-    if jvm is not None:
-        return jvm
+    for parent in parents:
+        for childname in sorted(os.listdir(parent)):
+            # Compute the real path
+            path = os.path.realpath(os.path.join(parent, childname))
+            if path in homes or not os.path.isdir(path):
+                # Already known path, or not a directory -> ignore
+                continue
 
-    # failing that, lets look in the "known" locations
-    for parent in _KNOWN_LOCATIONS:
-        # Get all children
-        children = map(lambda x: os.path.join(parent, x), os.listdir(parent))
+            # Check if the path seems OK
+            real_name = os.path.basename(path).lower()
+            for java_name in java_names:
+                if java_name in real_name:
+                    # Correct JVM folder name
+                    homes.append(path)
+                    yield path
+                    break
 
-        for home in filter_homes(children):
-            jvm = find_libjvm(home)
-            if jvm is not None:
-                return jvm
-
-    # Not found
-    raise ValueError("No libjvm.so file found. Try setting up the JAVA_HOME "
-                     "environment variable properly.")
-
+# ------------------------------------------------------------------------------
 
 def _getJVMFromJavaHome():
+    """
+    Retrieves the Java library path according to the JAVA_HOME environment
+    variable
+    
+    :return: The path to the JVM library, or None 
+    """
     java_home = os.getenv("JAVA_HOME")
-    if not java_home:
-        try:
-            # Look for the real installation path
-            java_home = os.path.realpath('/usr/bin/java').replace('bin/java', '')
-        except:  # I know. catchall is bad...
-            # Avoid NoneType + String
-            java_home = ''
-
-    rootJre = None
-    if os.path.exists(java_home + "/bin/javac"):
-        # this is a JDK home
-        rootJre = java_home + '/jre/lib'
-    elif os.path.exists(java_home + "/bin/java"):
-        # this is a JRE home
-        rootJre = java_home + '/lib'
-    else:
-        return None
-
-    for i in JRE_ARCHS:
-        if os.path.exists(rootJre + "/" + i):
-            return rootJre + "/" + i
-    return None
+    if java_home and os.path.exists(java_home):
+        return _find_libjvm(java_home)
 
 
-def _getJVMFromLibPath():
-    if 'LD_LIBRARY_PATH' in os.environ:
-        libpath = os.environ['LD_LIBRARY_PATH']
-        if libpath is None:
-            return None
+def _getJVMFromBin(java_bin="/usr/bin/java"):
+    """
+    Retrieves the Java library path according to the real installation of
+    the java executable
+    
+    :param java_bin: Path to the Java interpreter (default: /usr/bin/java)
+    :return: The path to the JVM library, or None
+    """
+    # Find the real interpreter installation path
+    java_bin = os.path.realpath(java_bin)
+    if os.path.exists(java_bin):
+        # Get to the home directory
+        java_home = os.path.abspath(os.path.join(os.path.dirname(java_bin),
+                                                 '..'))
 
-        paths = libpath.split(os.pathsep)
-        for i in paths:
-            if i.find('jre') != -1:
-                # this could be it!
-                # TODO
-                pass
+        # Look for the JVM library
+        return _find_libjvm(java_home)
 
-    return None
+
+def _getJVMFromKnownLocations():
+    """
+    Retrieves the first existing Java library path in the predefined known
+    locations
+    
+    :return: The path to the JVM library, or None 
+    """
+    for home in _find_possible_homes(PREDEFINED_LOCATIONS):
+        jvm = _find_libjvm(home)
+        if jvm is not None:
+            return jvm
