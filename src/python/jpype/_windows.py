@@ -16,6 +16,7 @@
 #*****************************************************************************
 
 from . import _jvmfinder
+import os
 import winreg
 
 # ------------------------------------------------------------------------------
@@ -34,9 +35,18 @@ class WindowsJVMFinder(_jvmfinder.JVMFinder):
         # Library file name
         self._libfile = "jvm.dll"
 
+        # Predefined locations
+        self._locations = {
+                   # 32 bits (or none on 32 bits OS) JDK
+                   os.path.join(os.environ['ProgramFiles(x86)'], "Java"),
+                   # 64 bits (or 32 bits on 32 bits OS) JDK
+                   os.path.join(os.environ['ProgramFiles'], "Java")
+                   }
+
         # Search methods
         self._methods = (self._get_from_java_home,
-                         self._get_from_registry)
+                         self._get_from_registry,
+                         self._get_from_known_locations)
 
 
     def _get_from_registry(self):
