@@ -3,8 +3,8 @@
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">python3</pydev_property>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 3.0</pydev_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
-<path>/jpype-fork</path>
-<path>/jpype-fork/src/python</path>
-<path>/jpype-fork/test</path>
+<path>/jpype-py3</path>
+<path>/jpype-py3/src/python</path>
+<path>/jpype-py3/test</path>
 </pydev_pathproperty>
 </pydev_project>
