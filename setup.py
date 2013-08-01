@@ -72,7 +72,7 @@ class JDKFinder(object):
         """
         Tries to locate a JDK home folder, according to the JAVA_HOME
         environment variable
-        
+
         :return: The path to the JDK home
         :raise NoJDKError: No JDK found
         """
@@ -86,14 +86,15 @@ class JDKFinder(object):
     def check_homes(self, homes):
         """
         Checks if one the given folders is a JDK home, and returns it
-        
+
         :param homes: A list of possible JDK homes
         :return: The first JDK home found
         :raise NoJDKError: No JDK found
         """
         for java_home in homes:
             java_home = os.path.realpath(java_home)
-            if self.check_jdk(java_home):
+            java_home = self.check_jdk(java_home)
+            if java_home is not None:
                 # Valid path
                 return java_home
 
@@ -104,7 +105,7 @@ class JDKFinder(object):
     def check_jdk(self, java_home):
         """
         Checks if the given folder can be a JDK installation
-        
+
         :param java_home: A possible JDK installation
         :return: The real folder path if it contains headers, else None
         """
@@ -126,11 +127,10 @@ class JDKFinder(object):
         # and if the folder name contains 'jdk' or 'java'
         for name in possible_names:
             if name in folder:
-                for include_name in ('include', 'Headers'):
-                    include_path = os.path.join(java_home, include_name)
-                    if os.path.exists(include_path):
-                        # Match
-                        return java_home
+                include_path = os.path.join(java_home, 'include')
+                if os.path.exists(include_path):
+                    # Match
+                    return java_home
 
 # ------------------------------------------------------------------------------
 
@@ -141,7 +141,7 @@ class WindowsJDKFinder(JDKFinder):
     def __init__(self):
         """
         Sets up the basic configuration
-        
+
         :raise ValueError: No JDK installation found
         """
         # Basic configuration
@@ -154,7 +154,7 @@ class WindowsJDKFinder(JDKFinder):
         java_home = self.find_jdk_home()
 
         # Home-based configuration
-        self.configuration['library_dir'] = [os.path.join(java_home, 'lib'), ]
+        self.configuration['library_dirs'] = [os.path.join(java_home, 'lib'), ]
         self.configuration['include_dirs'] += [
             os.path.join(java_home, 'include'),
             os.path.join(java_home, 'include', 'win32')
@@ -165,7 +165,7 @@ class WindowsJDKFinder(JDKFinder):
         """
         Tries to locate a JDK home folder, according to the JAVA_HOME
         environment variable, or to the Windows registry
-        
+
         :return: The path to the JDK home
         :raise ValueError: No JDK installation found
         """
@@ -197,7 +197,7 @@ class WindowsJDKFinder(JDKFinder):
         """
         Retrieves the path to the default Java installation stored in the
         Windows registry
-        
+
         :return: The path found in the registry, or None
         """
         import winreg
@@ -227,7 +227,7 @@ class DarwinJDKFinder(JDKFinder):
     def __init__(self):
         """
         Sets up the basic configuration
-        
+
         :raise ValueError: No JDK installation found
         """
         # Basic configuration
@@ -239,10 +239,9 @@ class DarwinJDKFinder(JDKFinder):
         java_home = self.find_jdk_home()
 
         # Home-based configuration
-        self.configuration['library_dir'] = [os.path.join(java_home,
-                                                          'Libraries')]
+        self.configuration['library_dirs'] = [os.path.join(java_home, 'lib')]
         self.configuration['include_dirs'] += [
-            os.path.join(java_home, 'Headers'),
+            os.path.join(java_home, 'include'),
         ]
 
 
@@ -250,7 +249,7 @@ class DarwinJDKFinder(JDKFinder):
         """
         Tries to locate a JDK home folder, according to the JAVA_HOME
         environment variable, or to the Windows registry
-        
+
         :return: The path to the JDK home
         :raise ValueError: No JDK installation found
         """
@@ -260,32 +259,68 @@ class DarwinJDKFinder(JDKFinder):
             return java_home
 
         except NoJDKError:
-            # Changes according to:
-            # http://stackoverflow.com/questions/8525193/cannot-install-jpype-on-os-x-lion-to-use-with-neo4j
-            # and
-            # http://blog.y3xz.com/post/5037243230/installing-jpype-on-mac-os-x
-            osx = platform.mac_ver()[0][:4]
+            pass
 
-            # Seems like the installation folder for Java 7
-            possible_homes = glob("/Library/Java/JavaVirtualMachines/*")
+        # Changes according to:
+        # http://stackoverflow.com/questions/8525193/cannot-install-jpype-on-os-x-lion-to-use-with-neo4j
+        # and
+        # http://blog.y3xz.com/post/5037243230/installing-jpype-on-mac-os-x
+        osx = platform.mac_ver()[0][:4]
 
-            if osx in ('10.7', '10.8'):
-                # ... for Java 6
-                possible_homes.append('/System/Library/Frameworks/' \
-                                      'JavaVM.framework/Versions/Current/')
+        # Seems like the installation folder for Java 7
+        possible_homes = glob("/Library/Java/JavaVirtualMachines/*")
 
-            elif osx == '10.6':
-                # Previous Mac OS version
-                possible_homes.append('/Developer/SDKs/MacOSX10.6.sdk/System/' \
-                                      'Library/Frameworks/JavaVM.framework/' \
-                                      'Versions/1.6.0/')
+        if osx in ('10.7', '10.8'):
+            # ... for Java 6
+            possible_homes.append('/System/Library/Frameworks/' \
+                                  'JavaVM.framework/Versions/Current/')
 
-            else:
-                # Other previous version
-                possible_homes.append('/Library/Java/Home')
+        elif osx == '10.6':
+            # Previous Mac OS version
+            possible_homes.append('/Developer/SDKs/MacOSX10.6.sdk/System/' \
+                                  'Library/Frameworks/JavaVM.framework/' \
+                                  'Versions/1.6.0/')
 
-            # Compute the real home folder
-            return self.check_homes(possible_homes)
+        else:
+            # Other previous version
+            possible_homes.append('/Library/Java/Home')
+
+        # Compute the real home folder
+        return self.check_homes(possible_homes)
+
+
+    def check_jdk(self, java_home):
+        """
+        Checks if the given folder can be a JDK installation for Mac OS X
+
+        :param java_home: A possible JDK installation
+        :return: The real folder path if it contains headers, else None
+        """
+        if not java_home:
+            return
+
+        # Lower-case content tests
+        folder = os.path.basename(java_home).lower()
+        if 'jdk' not in folder:
+            return
+
+        # Construct the full path
+        java_home = os.path.realpath(java_home)
+        if not os.path.isdir(java_home):
+            return
+
+        # Mac OS specific sub path
+        java_home = os.path.join(java_home, 'Contents', 'Home')
+        if not os.path.isdir(java_home):
+            return
+
+        # Consider it's a JDK if it has an 'include' folder
+        # and if the folder name contains 'jdk' or 'java'
+        include_path = os.path.join(java_home, 'include')
+        if os.path.exists(include_path):
+            # Match
+            return java_home
+
 
 # ------------------------------------------------------------------------------
 
@@ -296,7 +331,7 @@ class LinuxJDKFinder(JDKFinder):
     def __init__(self):
         """
         Sets up the basic configuration
-        
+
         :raise ValueError: No JDK installation found
         """
         # Basic configuration
@@ -307,7 +342,7 @@ class LinuxJDKFinder(JDKFinder):
         java_home = self.find_jdk_home()
 
         # Home-based configuration
-        self.configuration['library_dir'] = [os.path.join(java_home, 'lib')]
+        self.configuration['library_dirs'] = [os.path.join(java_home, 'lib')]
         self.configuration['include_dirs'] += [
             os.path.join(java_home, 'include'),
             os.path.join(java_home, 'include', 'linux'),
@@ -318,7 +353,7 @@ class LinuxJDKFinder(JDKFinder):
         """
         Tries to locate a JDK home folder, according to the JAVA_HOME
         environment variable, or to the Windows registry
-        
+
         :return: The path to the JDK home
         :raise ValueError: No JDK installation found
         """
