@@ -43,7 +43,6 @@ Road map
 Future developments of this fork of jPype :
 
 * Stay close to the Python 2 version (patches, issues, ...)
-* Convert tests in Python 3
 * Convert examples in Python 3
 * Review the code (Python and C++): clean up, add comments, ...
 * Separate Python 3 specific code (Python and C++)
