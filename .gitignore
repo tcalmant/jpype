@@ -3,6 +3,9 @@ __pycache__/
 *.pyc
 *.egg-info
 
+# File generated during tests
+testSerial.dat
+
 # Build directory
 build/
 dist/
@@ -10,4 +13,7 @@ dist/
 # Eclipse build directory
 Debug/
 Release/
+bin/
+classes/
+
 
