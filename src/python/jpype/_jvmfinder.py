@@ -46,11 +46,15 @@ class JVMFinder(object):
         :param filename: Name of the file to find
         :return: The first found file path, or None
         """
+        # Possible parents (in preference order)
+        possible_parents = ('server', 'client', 'cacao', 'jamvm')
+
         # Look for the file
-        for root, _, names in os.walk(java_home):
-            if self._libfile in names:
-                # Found it
-                return os.path.join(root, self._libfile)
+        for root, _, _ in os.walk(java_home):
+            for parent in possible_parents:
+                filename = os.path.join(root, parent, self._libfile)
+                if os.path.exists(filename):
+                    return filename
 
         else:
             # File not found
