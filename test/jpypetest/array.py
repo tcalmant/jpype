@@ -27,7 +27,13 @@ def suite() :
 
 class ArrayTestCase(common.JPypeTestCase) :
     def __arrayEquals(self, a1, a2) :
-        assert len(a1) == len(a2)
+        try:
+            assert len(a1) == len(a2)
+
+        except AssertionError:
+            print("%s - %s" % (len(a1), len(a2)))
+            print("%s - %s" % (a1, a2))
+            raise
 
         for i in range(len(a1)) :
             assert a1[i] == a2[i]
@@ -43,7 +49,7 @@ class ArrayTestCase(common.JPypeTestCase) :
         self.__arrayEquals(VALUES[1:-2], t.i[1:-2])
 
     def testStangeBehavior(self) :
-        ''' Test for stange crash reported in bug #1089302'''
+        ''' Test for strange crash reported in bug #1089302'''
         Test2 = jpype.JPackage('jpype.array').Test2
         test = Test2()
         test.test(test.getValue())
@@ -99,7 +105,7 @@ class ArrayTestCase(common.JPypeTestCase) :
         assert str(v) == 'avcd'
 
     def testByteArrayIntoVector(self):
-        ba = jpype.JArray(jpype.JByte)('123')
+        ba = jpype.JArray(jpype.JByte)(b'123')
         v = jpype.java.util.Vector(1)
         v.add(ba)
         assert len(v) == 1

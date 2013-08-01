@@ -19,5 +19,5 @@ jpype.startJVM(jpype.getDefaultJVMPath(), "-ea")
 
 s = jpype.java.lang.String
 t = jpype.java.awt.Color
-print s
-print t
+print(s)
+print(t)

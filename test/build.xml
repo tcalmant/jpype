@@ -8,8 +8,8 @@
 		<javac destdir="classes"
 			srcdir="harness"
 			includes="jpype/**"
-			source="1.4"
-			target="1.4"
+			source="1.6"
+			target="1.6"
 		/>
 		<rmic base="classes"
 			classname="jpype.rmi.ServerImpl"

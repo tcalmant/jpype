@@ -36,14 +36,14 @@ class ExceptionTestCase(common.JPypeTestCase) :
 		except JavaException as ex:
 			print('Caught a Java exception ...')
 			if ex.javaClass() is java.lang.RuntimeException :
-				print("Caught the exception", ex.message())
-				print(ex.stacktrace())
+				print(("Caught the exception", ex.message()))
+				print((ex.stacktrace()))
 			else:
 				assert False
 
 		except Exception as ex:
-			print(ex.__class__, isinstance(ex, JavaException))
-			print(ex.__class__.__bases__[0].__bases__[0].__bases__)
+			print((ex.__class__, isinstance(ex, JavaException)))
+			print((ex.__class__.__bases__[0].__bases__[0].__bases__))
 			print(JavaException)
 			assert False
 
@@ -55,9 +55,9 @@ class ExceptionTestCase(common.JPypeTestCase) :
 			assert False
 
 		except JException(java.lang.RuntimeException) as ex :
-			print("Caught the exception {0} -> {1}".format(ex.message(),
-														ex.javaClass()))
-			print(ex.stacktrace())
+			print(("Caught the exception {0} -> {1}".format(ex.message(),
+														ex.javaClass())))
+			print((ex.stacktrace()))
 
 		except Exception as ex:
 			print(ex)
@@ -65,12 +65,12 @@ class ExceptionTestCase(common.JPypeTestCase) :
 
 # 	def testThrowException(self) :
 # 		d = {"throwIOException" : throwIOException, }
-# 		p = JProxy(self.jpype.exc.ExceptionThrower, dict=d)
+# 		p = JProxy(self.jpype.exc.ExceptionThrower, dictionary=d)
 #
 # 		assert self.jpype.exc.ExceptionTest.delegateThrow(p)
 
 	def testThrowException3(self) :
 		d = {"throwIOException" : throwByJavaException, }
-		p = JProxy(self.jpype.exc.ExceptionThrower, dict=d)
+		p = JProxy(self.jpype.exc.ExceptionThrower, dictionary=d)
 
 		assert self.jpype.exc.ExceptionTest.delegateThrow(p)

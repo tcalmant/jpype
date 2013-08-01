@@ -35,7 +35,7 @@ def suite() :
 def runTest() :
 	root = os.path.abspath(os.path.dirname(__file__))
 
-	print("Running testsuite using JVM: {0}".format(jpype.getDefaultJVMPath()))
+	print(("Running testsuite using JVM: {0}".format(jpype.getDefaultJVMPath())))
 	jpype.startJVM(jpype.getDefaultJVMPath(),
 				   "-ea", "-Xmx256M", "-Xms64M",
 				   "-Djava.class.path={0}" \
@@ -45,7 +45,7 @@ def runTest() :
 	runner.run(suite())
 
 	s = slice(2, 4)
-	print("{0} {1}".format(s, dir(s)))
+	print(("{0} {1}".format(s, dir(s))))
 
 	jpype.shutdownJVM()
 

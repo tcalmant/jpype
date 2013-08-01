@@ -28,8 +28,8 @@ DATA_SIZE = 5*1024*1024 # 5 MB
 
 
 def runBaseline(data):    
-    print 'Running baseline test : converting a python string->array.array->JArray(JByte). size = ', len(data)/1024.0, 'kb'
-    print '    Start time (no optimize) on my machine is 3.56 seconds.'
+    print('Running baseline test : converting a python string->array.array->JArray(JByte). size = ', len(data)/1024.0, 'kb')
+    print('    Start time (no optimize) on my machine is 3.56 seconds.')
     start = time.time()
      
     #darr = array.array('b', DATA)
@@ -38,22 +38,22 @@ def runBaseline(data):
     
     end = time.time()
     
-    print '    test run in', (end-start), 'seconds.'
+    print('    test run in', (end-start), 'seconds.')
 
 def runStringToByteBuffer(data):
-    print 'Running String conversion to byte buffer. size = ', len(data)/1024.0, 'kb'
+    print('Running String conversion to byte buffer. size = ', len(data)/1024.0, 'kb')
     start = time.time()
 
     bb = jpype.nio.convertToDirectBuffer(data)
 
     end = time.time()
     
-    print '    test run in', (end-start), 'seconds.'
+    print('    test run in', (end-start), 'seconds.')
 
     jpype.JPackage("jpype").nio.NioReceive.receiveBuffer(bb)
 
 def runStringToByteArray(data):
-    print 'Running String conversion to byte array. size = ', len(data)/1024.0, 'kb'
+    print('Running String conversion to byte array. size = ', len(data)/1024.0, 'kb')
     start = time.time()
 
     arr_cls = jpype.JArray(jpype.JByte)
@@ -61,7 +61,7 @@ def runStringToByteArray(data):
 
     end = time.time()
     
-    print '    test run in', (end-start), 'seconds.'
+    print('    test run in', (end-start), 'seconds.')
 
 root = os.path.abspath(os.path.dirname(__file__))
 jpype.startJVM(jpype.getDefaultJVMPath(), "-ea", "-Xmx5M", "-verbose:gc", "-Djava.class.path=./classes%s%s%sclasses" % (os.pathsep, root, os.sep))
@@ -70,32 +70,32 @@ DELETED = False
 class MyStr(str):
     def __del__(self):
         global DELETED
-        print 'string got deleted'
+        print('string got deleted')
         DELETED = True
 
 def testStringMemory():
-    print 'with keeping the data'
+    print('with keeping the data')
     data = MyStr('5' * 1024)
-    print data
+    print(data)
     buf = jpype.nio.convertToDirectBuffer(data)
 #    print buf.get()
 #    print buf.get()
 #    print buf.get()
 
-    print 'now deleting the data'
+    print('now deleting the data')
     del data
 #    print buf.get()
 #    print buf.get()
 #    print buf.get()
 #    print buf.get()
     
-    print 'now deleting the buffer itself'
+    print('now deleting the buffer itself')
     del buf
-    print 'now waiting for the string to get deleted'
+    print('now waiting for the string to get deleted')
     while not DELETED:
         time.sleep(1)
         
-        print '.',
+        print('.', end=' ')
         jpype.JPackage("jpype").nio.NioReceive.allocSomeMemory()
 
 testStringMemory()

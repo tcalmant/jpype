@@ -25,12 +25,12 @@ class MyStr(str):
         str.__init__(self, val)
         global cnt
         cnt += 1
-        print 'created string', cnt
+        print('created string', cnt)
     
     def __del__(self):
         global cnt
         cnt -= 1
-        print 'deleted string', cnt
+        print('deleted string', cnt)
     
 receive = JClass("jpype.nio.NioReceive")
         

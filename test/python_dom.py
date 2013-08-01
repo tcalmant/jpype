@@ -45,5 +45,5 @@ for i in range(count) :
     output(el)
 
 t2 = time.time()
-print count, "iterations in", t2-t, "seconds"
+print(count, "iterations in", t2-t, "seconds")
 

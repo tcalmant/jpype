@@ -68,6 +68,6 @@ for i in range(count) :
     build.parse("d:/darkwolf/jpype/test/sample/big.xml", dh)
     
 t2 = time.time()
-print count, "iterations in", t2-t, "seconds"
+print(count, "iterations in", t2-t, "seconds")
 
 shutdownJVM()

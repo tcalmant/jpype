@@ -132,8 +132,8 @@ class AttributeTestCase(common.JPypeTestCase) :
         h = self.__jp.Test1()
         h.charValue = 'b'
 
-        print(h.charValue)
-        print(repr(h.charValue))
+        print((h.charValue))
+        print((repr(h.charValue)))
 
         assert h.charValue == 'b'
 

@@ -34,9 +34,9 @@ class NumericTestCase(common.JPypeTestCase) :
         if sys.platform.find("linux") != -1 :
             # double comparison on linux is broken ... Nan == 0.0!!!
             print("{0} != {1} -> {2} == -> {3}"\
-                  .format(java.lang.Double.NaN), 0.0,
-                  bool(java.lang.Double.NaN != 0.0),
-                  bool(java.lang.Double.NaN == 0.0))
+                  .format(java.lang.Double.NaN, 0.0,
+                          bool(java.lang.Double.NaN != 0.0),
+                          bool(java.lang.Double.NaN == 0.0)))
         else :
             assert java.lang.Double.NEGATIVE_INFINITY != 0.0
             assert java.lang.Double.MAX_VALUE != 0.0

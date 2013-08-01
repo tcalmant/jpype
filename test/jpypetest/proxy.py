@@ -34,9 +34,9 @@ class C :
     def testMethod2(self) :
         return "Bar"
 
-    def write(self, bytes, start, length) :
+    def write(self, data, start, length) :
         print('aaaaa')
-        print(bytes.__class__, bytes[0])
+        print((data.__class__, data[0]))
         print(start)
         print(length)
 
@@ -48,7 +48,7 @@ class ProxyTestCase(common.JPypeTestCase) :
         }
         itf2 = JPackage("jpype.proxy").ITestInterface3
         Test3 = JPackage("jpype.proxy").Test3
-        proxy = JProxy(itf2, dict=d)
+        proxy = JProxy(itf2, dictionary=d)
 
         Test3.testProxy(proxy)
 

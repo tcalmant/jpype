@@ -17,7 +17,7 @@ startJVM("c:/tools/jdk1.4.2/jre/bin/server/jvm.dll", *options)
 
 class MyStr(str):
     def __del__(self):
-        print 'string got deleted'
+        print('string got deleted')
         
 while True:
 	buf = java.lang.String('5' * 1024 * 1024 * 5)

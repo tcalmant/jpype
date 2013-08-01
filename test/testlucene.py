@@ -15,9 +15,9 @@ directory = FSDirectory.getDirectory("c:/temp/lucene",False)
 reader = IndexReader.open(directory) 
 searcher = IndexSearcher(reader) 
 queryparser = QueryParser.parse("wenger","contents",StandardAnalyzer()) 
-print queryparser.rewrite
-print queryparser.rewrite.matchReport(reader)
+print(queryparser.rewrite)
+print(queryparser.rewrite.matchReport(reader))
 qp = queryparser.rewrite(reader) 
-print qp
-print searcher.search.matchReport(qp) 
+print(qp)
+print(searcher.search.matchReport(qp)) 
 hits = searcher.search(qp) 

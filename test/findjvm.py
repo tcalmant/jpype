@@ -17,4 +17,4 @@
 import jpype, os.path
 
 jvmlib = jpype.getDefaultJVMPath()
-print os.path.dirname(os.path.dirname(jvmlib))
+print(os.path.dirname(os.path.dirname(jvmlib)))
