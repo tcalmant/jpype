@@ -438,16 +438,18 @@ jpypeLib = Extension(name="_jpype", **config.configuration)
 
 # Setup the package
 setup(
-    name="JPype - Python 3",
+    name="JPype1-py3",
     version="0.5.5",
     description="Python-Java bridge. Fork of the jPype project by "
     "Steve Menard (http://jpype.sourceforge.net/), with the "
     "modifications applied by Luis Nell "
     "(https://github.com/originell/jpype)",
-    long_description=open("README.md").read(),
+    long_description=open("README.rst").read(),
     license='License :: OSI Approved :: Apache Software License',
-    author="Thomas Calmant",
-    author_email="thomas.calmant@gmail.com",
+    author='Steve Menard',
+    author_email='devilwolf@users.sourceforge.net',
+    maintainer='Thomas Calmant',
+    maintainer_email='thomas.calmant@gmail.com',
     url="http://github.com/tcalmant/jpype-py3/",
     platforms=[
         'Operating System :: MacOS :: MacOS X',
