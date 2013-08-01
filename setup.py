@@ -15,6 +15,13 @@ except ImportError:
 
 # ------------------------------------------------------------------------------
 
+if sys.version_info[0] < 3:
+    print("This module can only be used with Python 3.")
+    print("For a Python 2 version, see:\nhttps://github.com/originell/jpype")
+    sys.exit(1)
+
+# ------------------------------------------------------------------------------
+
 class NoJDKError(Exception):
     """
     No JDK found
@@ -25,12 +32,15 @@ class NoJDKError(Exception):
         """
         Exception.__init__(self, "No JDK found")
 
-        # Normalize possible homes -> always give an iterable
-        if possible_homes is not None \
-        and not isinstance(possible_homes, (list, tuple)):
-            possible_homes = [possible_homes]
+        # Normalize possible homes -> always give an iterable or None
+        if not possible_homes:
+            self.possible_homes = []
 
-        self.possible_homes = possible_homes
+        elif not isinstance(possible_homes, (list, tuple)):
+            self.possible_homes = [possible_homes]
+
+        else:
+            self.possible_homes = possible_homes
 
 
 class JDKFinder(object):
@@ -88,18 +98,15 @@ class JDKFinder(object):
         Checks if one the given folders is a JDK home, and returns it
 
         :param homes: A list of possible JDK homes
-        :return: The first JDK home found
-        :raise NoJDKError: No JDK found
+        :return: The first JDK home found, or None
         """
         for java_home in homes:
-            java_home = os.path.realpath(java_home)
-            java_home = self.check_jdk(java_home)
+            java_home = self.check_jdk(os.path.realpath(java_home))
             if java_home is not None:
                 # Valid path
                 return java_home
 
-        else:
-            raise NoJDKError(homes)
+        return None
 
 
     def check_jdk(self, java_home):
@@ -169,28 +176,37 @@ class WindowsJDKFinder(JDKFinder):
         :return: The path to the JDK home
         :raise ValueError: No JDK installation found
         """
+        visited_folders = []
         try:
             java_home = JDKFinder.find_jdk_home(self)
             # Found it
             return java_home
 
-        except NoJDKError:
-            # Try from registry
-            java_home = self._get_from_registry()
-            if java_home and self.check_jdk(java_home):
-                return java_home
+        except NoJDKError as ex:
+            visited_folders.extend(ex.possible_homes)
 
-            # Try with known locations
-            # 32 bits (or none on 32 bits OS) JDK
-            possible_homes = glob(os.path.join(os.environ['ProgramFiles(x86)'],
-                                               "Java", "*"))
+        # Try from registry
+        java_home = self._get_from_registry()
+        if java_home and self.check_jdk(java_home):
+            return java_home
 
-            # 64 bits (or 32 bits on 32 bits OS) JDK
-            possible_homes += glob(os.path.join(os.environ['ProgramFiles'],
-                                                "Java", "*"))
+        # Try with known locations
+        # 32 bits (or none on 32 bits OS) JDK
+        possible_homes = glob(os.path.join(os.environ['ProgramFiles(x86)'],
+                                           "Java", "*"))
 
-            # Compute the real home folder
-            return self.check_homes(possible_homes)
+        # 64 bits (or 32 bits on 32 bits OS) JDK
+        possible_homes += glob(os.path.join(os.environ['ProgramFiles'],
+                                            "Java", "*"))
+
+        # Compute the real home folder
+        java_home = self.check_homes(possible_homes)
+        if java_home:
+            return java_home
+
+        else:
+            visited_folders.extend(possible_homes)
+            raise NoJDKError(visited_folders)
 
 
     def _get_from_registry(self):
@@ -253,13 +269,14 @@ class DarwinJDKFinder(JDKFinder):
         :return: The path to the JDK home
         :raise ValueError: No JDK installation found
         """
+        visited_folders = []
         try:
             java_home = JDKFinder.find_jdk_home(self)
             # Found it
             return java_home
 
-        except NoJDKError:
-            pass
+        except NoJDKError as ex:
+            visited_folders.extend(ex.possible_homes)
 
         # Changes according to:
         # http://stackoverflow.com/questions/8525193/cannot-install-jpype-on-os-x-lion-to-use-with-neo4j
@@ -286,7 +303,14 @@ class DarwinJDKFinder(JDKFinder):
             possible_homes.append('/Library/Java/Home')
 
         # Compute the real home folder
-        return self.check_homes(possible_homes)
+        java_home = self.check_homes(possible_homes)
+        if java_home:
+            return java_home
+
+        else:
+            # No JDK found
+            visited_folders.extend(possible_homes)
+            raise NoJDKError(visited_folders)
 
 
     def check_jdk(self, java_home):
@@ -357,20 +381,29 @@ class LinuxJDKFinder(JDKFinder):
         :return: The path to the JDK home
         :raise ValueError: No JDK installation found
         """
+        visited_folders = []
         try:
             java_home = JDKFinder.find_jdk_home(self)
             # Found it
             return java_home
 
-        except NoJDKError:
-            # (Almost) standard in GNU/Linux
-            possible_homes = glob('/usr/lib/jvm/*')
+        except NoJDKError as ex:
+            visited_folders.extend(ex.possible_homes)
 
-            # Sun/Oracle Java in some cases
-            possible_homes += glob('/usr/java/*')
+        # (Almost) standard in GNU/Linux
+        possible_homes = glob('/usr/lib/jvm/*')
 
-            # Compute the real home folder
-            return self.check_homes(possible_homes)
+        # Sun/Oracle Java in some cases
+        possible_homes += glob('/usr/java/*')
+
+        # Compute the real home folder
+        java_home = self.check_homes(possible_homes)
+        if java_home:
+            return java_home
+
+        else:
+            visited_folders.extend(possible_homes)
+            raise NoJDKError(visited_folders)
 
 # ------------------------------------------------------------------------------
 
@@ -387,15 +420,16 @@ try:
 except NoJDKError as ex:
     raise RuntimeError(
                 "No Java/JDK could be found. I looked in the following "
-                "directories: \n\n%s\n\nPlease check that you have it "
-                "installed.\n\nIf you have and the destination is not in the "
+                "directories:\n\n{0}\n\n"
+                "Please check that you have it installed.\n\n"
+                "If you have and the destination is not in the "
                 "above list, please find out where your java's home is, "
                 "set your JAVA_HOME environment variable to that path and "
                 "retry the installation.\n"
                 "If this still fails please open a ticket or create a "
-                "pull request with a fix on github: "
+                "pull request with a fix on github:\n"
                 "https://github.com/tcalmant/jpype/"
-                % '\n'.join(ex.possible_homes))
+                .format('\n'.join(ex.possible_homes)))
 
 # ------------------------------------------------------------------------------
 
