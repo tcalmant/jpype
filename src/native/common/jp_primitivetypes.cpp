@@ -73,7 +73,6 @@ EMatchType JPByteType::canConvertToJava(HostRef* obj)
 		}
 	}
 
-
 	return _none;
 }
 
@@ -86,7 +85,6 @@ void JPByteType::setArrayValues(jarray a, HostRef* values)
 
     try {
         val = JPEnv::getJava()->GetByteArrayElements(array, &isCopy);
-		bool converted = true;
 
 		// Optimize what I can ...
 		if (JPEnv::getHost()->isByteString(values))
@@ -96,7 +94,6 @@ void JPByteType::setArrayValues(jarray a, HostRef* values)
 			char* data;
 			JPEnv::getHost()->getRawByteString(values, &data, len);
 			memcpy(val, data, len);
-			converted = true;
 		}
 		// TODO also optimize array.array ...
 		else if (JPEnv::getHost()->isSequence(values))
@@ -108,8 +105,6 @@ void JPByteType::setArrayValues(jarray a, HostRef* values)
 				val[i] = convertToJava(v).b;
 				delete v;
 			}
-
-			converted = true;
 		}	
 		else
 		{
@@ -261,7 +256,6 @@ void JPShortType::setArrayValues(jarray a, HostRef* values)
 
     try {
         val = JPEnv::getJava()->GetShortArrayElements(array, &isCopy);
-		bool converted = true;
 
 		// Optimize what I can ...
 		// TODO also optimize array.array ...
@@ -274,8 +268,6 @@ void JPShortType::setArrayValues(jarray a, HostRef* values)
 				val[i] = convertToJava(v).s;
 				delete v;
 			}
-
-			converted = true;
 		}	
 		else
 		{
@@ -378,7 +370,6 @@ void JPIntType::setArrayValues(jarray a, HostRef* values)
 
     try {
         val = JPEnv::getJava()->GetIntArrayElements(array, &isCopy);
-		bool converted = true;
 
 		// Optimize what I can ...
 		// TODO also optimize array.array ...
@@ -391,8 +382,6 @@ void JPIntType::setArrayValues(jarray a, HostRef* values)
 				val[i] = convertToJava(v).i;
 				delete v;
 			}
-
-			converted = true;
 		}	
 		else
 		{
@@ -485,7 +474,6 @@ void JPLongType::setArrayValues(jarray a, HostRef* values)
 
     try {
         val = JPEnv::getJava()->GetLongArrayElements(array, &isCopy);
-		bool converted = true;
 
 		// Optimize what I can ...
 		// TODO also optimize array.array ...
@@ -498,9 +486,7 @@ void JPLongType::setArrayValues(jarray a, HostRef* values)
 				val[i] = convertToJava(v).j;
 				delete v;
 			}
-
-			converted = true;
-		}	
+		}
 		else
 		{
 			RAISE(JPypeException, "Unable to convert to Long array");
@@ -589,7 +575,6 @@ void JPFloatType::setArrayValues(jarray a, HostRef* values)
 
     try {
         val = JPEnv::getJava()->GetFloatArrayElements(array, &isCopy);
-		bool converted = true;
 
 		// Optimize what I can ...
 		// TODO also optimize array.array ...
@@ -602,8 +587,6 @@ void JPFloatType::setArrayValues(jarray a, HostRef* values)
 				val[i] = convertToJava(v).f;
 				delete v;
 			}
-
-			converted = true;
 		}	
 		else
 		{
@@ -687,7 +670,6 @@ void JPDoubleType::setArrayValues(jarray a, HostRef* values)
 
     try {
         val = JPEnv::getJava()->GetDoubleArrayElements(array, &isCopy);
-		bool converted = true;
 
 		// Optimize what I can ...
 		// TODO also optimize array.array ...
@@ -700,8 +682,6 @@ void JPDoubleType::setArrayValues(jarray a, HostRef* values)
 				val[i] = convertToJava(v).d;
 				delete v;
 			}
-
-			converted = true;
 		}	
 		else
 		{
@@ -793,7 +773,6 @@ void JPCharType::setArrayValues(jarray a, HostRef* values)
 
     try {
         val = JPEnv::getJava()->GetCharArrayElements(array, &isCopy);
-		bool converted = true;
 
 		// Optimize what I can ...
 		// TODO also optimize array.array ...
@@ -806,8 +785,6 @@ void JPCharType::setArrayValues(jarray a, HostRef* values)
 				val[i] = convertToJava(v).c;
 				delete v;
 			}
-
-			converted = true;
 		}	
 		else
 		{
@@ -892,7 +869,6 @@ void JPBooleanType::setArrayValues(jarray a, HostRef* values)
 
     try {
         val = JPEnv::getJava()->GetBooleanArrayElements(array, &isCopy);
-		bool converted = true;
 
 		// Optimize what I can ...
 		// TODO also optimize array.array ...
@@ -905,8 +881,6 @@ void JPBooleanType::setArrayValues(jarray a, HostRef* values)
 				val[i] = convertToJava(v).z;
 				delete v;
 			}
-
-			converted = true;
 		}	
 		else
 		{
