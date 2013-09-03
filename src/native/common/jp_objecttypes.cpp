@@ -221,8 +221,6 @@ void JPObjectType::setArrayValues(jarray a, HostRef* values)
     JPCleaner cleaner;
 
     try {
-		bool converted = true;
-
 		// Optimize what I can ...
 		// TODO also optimize array.array ...
 		if (JPEnv::getHost()->isSequence(values))
@@ -234,8 +232,6 @@ void JPObjectType::setArrayValues(jarray a, HostRef* values)
 				JPEnv::getJava()->SetObjectArrayElement(array, i, convertToJava(v).l);
 				delete v;
 			}
-
-			converted = true;
 		}	
 		else
 		{

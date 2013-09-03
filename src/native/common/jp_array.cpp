@@ -1,5 +1,5 @@
 /*****************************************************************************
-   Copyright 2004 Steve Ménard
+   Copyright 2004 Steve Mï¿½nard
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ vector<HostRef*> JPArray::getRange(int start, int stop)
 {
 	TRACE_IN("JPArray::getRange");
 	JPType* compType = m_Class->getComponentType();
-	TRACE2("Compoennt type", compType->getName().getSimpleName());
+	TRACE2("Component type", compType->getName().getSimpleName());
 	
 	vector<HostRef*> res = compType->getArrayRange(m_Object, start, stop-start);
 	
@@ -50,7 +50,15 @@ void JPArray::setRange(int start, int stop, vector<HostRef*>& val)
 	
 	JPType* compType = m_Class->getComponentType();
 	
-	int len = stop-start;
+	if(stop < start)
+	{
+		std::stringstream out;
+		out << "Slice start (" << start << ") is greater than stop ("
+			<< stop << ")";
+		RAISE(JPypeException, out.str());
+	}
+
+	unsigned int len = stop-start;
 	size_t plength = val.size();
 	
 	if (len != plength)
