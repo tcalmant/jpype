@@ -1,5 +1,5 @@
 /*****************************************************************************
-   Copyright 2004 Steve Ménard
+   Copyright 2004 Steve Mï¿½nard
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 *****************************************************************************/   
 #ifndef _PLATFORM_WIN32_H_
 #define _PLATFORM_WIN32_H_
+
+#ifdef WIN32
 
 #include <windows.h>
 
@@ -72,4 +74,5 @@ public :
 	}
 };
 
+#endif // WIN32
 #endif // _PLATFORM_WIN32_H_
