@@ -72,8 +72,3 @@ class WindowsJVMFinder(_jvmfinder.JVMFinder):
             pass
 
         return None
-
-# ------------------------------------------------------------------------------
-
-# Alias
-JVMFinder = WindowsJVMFinder

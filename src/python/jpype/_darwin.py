@@ -47,8 +47,3 @@ class DarwinJVMFinder(LinuxJVMFinder):
         '/System/Library/Frameworks/JavaVM.framework/JavaVM'
         """
         return '/System/Library/Frameworks/JavaVM.framework/JavaVM'
-
-# ------------------------------------------------------------------------------
-
-# Alias
-JVMFinder = DarwinJVMFinder
