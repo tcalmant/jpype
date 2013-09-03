@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #*****************************************************************************
 #   Copyright 2004-2008 Steve Menard
 #
@@ -12,9 +14,11 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
-import jpype, os.path
+
+import jpype
+import os
 
 jvmlib = jpype.getDefaultJVMPath()
-print os.path.dirname(os.path.dirname(jvmlib))
+print(os.path.dirname(os.path.dirname(jvmlib)))
