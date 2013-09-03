@@ -30,10 +30,13 @@
 								<option id="gnu.cpp.compiler.so.debug.option.optimization.level.414007668" name="Optimization Level" superClass="gnu.cpp.compiler.so.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.so.debug.option.debugging.level.349898332" name="Debug Level" superClass="gnu.cpp.compiler.so.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.244420652" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include/python3.2mu/"/>
 									<listOptionValue builtIn="false" value="/usr/lib/jvm/java-7-openjdk-amd64/include"/>
 									<listOptionValue builtIn="false" value="/usr/lib/jvm/java-7-openjdk-amd64/include/linux"/>
-									<listOptionValue builtIn="false" value="/usr/include/python3.2mu/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/jpype-py3/src/native/common/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/jpype-py3/src/native/python/include}&quot;"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.other.pic.1993047476" superClass="gnu.cpp.compiler.option.other.pic" value="true" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1488835363" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.853814493" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug">
@@ -88,6 +91,14 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.release.705159028" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.release">
 								<option id="gnu.cpp.compiler.so.release.option.optimization.level.265464903" name="Optimization Level" superClass="gnu.cpp.compiler.so.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.so.release.option.debugging.level.1237181104" name="Debug Level" superClass="gnu.cpp.compiler.so.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.include.paths.2126442274" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include/python3.2mu/"/>
+									<listOptionValue builtIn="false" value="/usr/lib/jvm/java-7-openjdk-amd64/include"/>
+									<listOptionValue builtIn="false" value="/usr/lib/jvm/java-7-openjdk-amd64/include/linux"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/jpype-py3/src/native/common/include}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/jpype-py3/src/native/python/include}&quot;"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.other.pic.1008384004" superClass="gnu.cpp.compiler.option.other.pic" value="true" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1449944528" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.929734479" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release">
@@ -118,29 +129,29 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="jpype-fork.cdt.managedbuild.target.gnu.so.1255862533" name="Shared Library" projectType="cdt.managedbuild.target.gnu.so"/>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Release"/>
+		<configuration configurationName="Debug"/>
+		<configuration configurationName="Preference Configuration">
+			<resource resourceType="PROJECT" workspacePath="/jpype-fork"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.1877108344;cdt.managedbuild.config.gnu.so.debug.1877108344.;cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1665707204;cdt.managedbuild.tool.gnu.cpp.compiler.input.1488835363">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.release.972091711;cdt.managedbuild.config.gnu.so.release.972091711.;cdt.managedbuild.tool.gnu.cpp.compiler.so.release.705159028;cdt.managedbuild.tool.gnu.cpp.compiler.input.1449944528">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.release.972091711;cdt.managedbuild.config.gnu.so.release.972091711.;cdt.managedbuild.tool.gnu.c.compiler.so.release.929734479;cdt.managedbuild.tool.gnu.c.compiler.input.661533934">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.1877108344;cdt.managedbuild.config.gnu.so.debug.1877108344.;cdt.managedbuild.tool.gnu.c.compiler.so.debug.853814493;cdt.managedbuild.tool.gnu.c.compiler.input.430897951">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.debug.1877108344;cdt.managedbuild.config.gnu.so.debug.1877108344.;cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1665707204;cdt.managedbuild.tool.gnu.cpp.compiler.input.1488835363">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.so.release.972091711;cdt.managedbuild.config.gnu.so.release.972091711.;cdt.managedbuild.tool.gnu.c.compiler.so.release.929734479;cdt.managedbuild.tool.gnu.c.compiler.input.661533934">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Release"/>
-		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/jpype-fork"/>
-		</configuration>
-		<configuration configurationName="Preference Configuration">
-			<resource resourceType="PROJECT" workspacePath="/jpype-fork"/>
-		</configuration>
-	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>
