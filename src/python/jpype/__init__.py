@@ -14,6 +14,7 @@
 #   limitations under the License.
 #
 #*****************************************************************************
+
 from ._jpackage import *
 from ._jclass import *
 from ._jarray import *
@@ -22,11 +23,6 @@ from ._jproxy import *
 from ._jexception import *
 from ._core import *
 from ._gui import *
-from . import reflect
-from . import nio
-
-
-from . import JClassUtil
 
 def JIterator(it) :
     """Deprecated"""
@@ -34,4 +30,3 @@ def JIterator(it) :
 
 java = JPackage("java")
 javax = JPackage("javax")
-
