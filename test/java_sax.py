@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #*****************************************************************************
 #   Copyright 2004-2008 Steve Menard
 #
@@ -12,14 +14,16 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
 import time
-from jpype import *
+from jpype import javax, JProxy, JPackage, startJVM, getDefaultJVMPath, \
+    shutdownJVM
 
 import os.path
 root = os.path.abspath(os.path.dirname(__file__))
-startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=%s/classes" % root)
+classes = os.path.join(root, "classes")
+startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path={0}".format(classes))
 
 # XML test
 Element = JPackage("org").w3c.dom.Element
@@ -49,7 +53,7 @@ class ContentHandler(object) :
     def skippedEntity(self, name) :
         pass
 
-    def startDocument(self, ) :
+    def startDocument(self,) :
         pass
 
     def startElement(self, namespaceURI, localName, qName, atts) :
@@ -58,16 +62,22 @@ class ContentHandler(object) :
     def startPrefixMapping(self, prefix, uri) :
         pass
 
-t = time.time()
+# Compute the XML file path
+xml_file = os.path.join(root, "sample", "big.xml")
+
+t1 = time.time()
 count = 30
-for i in range(count) :    
+for i in range(count) :
     DelegateHandler = JPackage("jpype.xml").DelegateHandler
-    dh = DelegateHandler(None, None, JProxy("org.xml.sax.ContentHandler", inst=ContentHandler()), None)
-    
+    dh = DelegateHandler(None, None,
+                         JProxy("org.xml.sax.ContentHandler",
+                                inst=ContentHandler()),
+                         None)
+
     build = javax.xml.parsers.SAXParserFactory.newInstance().newSAXParser()
-    build.parse("d:/darkwolf/jpype/test/sample/big.xml", dh)
-    
+    build.parse(xml_file, dh)
+
 t2 = time.time()
-print(count, "iterations in", t2-t, "seconds")
+print(count, "iterations in", t2 - t1, "seconds")
 
 shutdownJVM()

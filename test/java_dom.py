@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #*****************************************************************************
 #   Copyright 2004-2008 Steve Menard
 #
@@ -12,10 +14,12 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
+
+import os
 import time
-from jpype import *
+from jpype import javax, JPackage, startJVM, getDefaultJVMPath, shutdownJVM
 
 startJVM(getDefaultJVMPath(), "-ea")
 
@@ -25,32 +29,36 @@ Element = JPackage("org").w3c.dom.Element
 def output(el, prefix="") :
     if not Element.__isinstance__(el) :
         return
-        
-    #print prefix, "<", el.getTagName(), 
-    
+
+    print("{0}<{1}".format(prefix, el.getTagName()), end='')
+
     atts = el.getAttributes()
     for i in range(atts.getLength()) :
         a = atts.item(i);
-        #print a.getNodeName(), '="%s"' % a.getNodeValue(), 
-    #print '>'
-    
+        print(' {0}="{1}"'.format(a.getNodeName(), a.getNodeValue()), end='')
+
+    print('>')
+
     nl = el.getChildNodes()
     for i in range(nl.getLength()) :
-        output(nl.item(i), prefix+"  ")
+        output(nl.item(i), prefix + "  ")
+
+    print("{0}</{1}>".format(prefix, el.getTagName()))
 
 
-    #print prefix, "</", el.getTagName(), ">"
+# Compute the XML file path
+xml_file = os.path.join(os.path.dirname(__file__), "sample", "big.xml")
 
-t = time.time()
+t1 = time.time()
 count = 30
-for i in range(count) :    
+for i in range(count) :
     build = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder()
-    doc = build.parse("d:/darkwolf/jpype/test/sample/big.xml")
-    
+    doc = build.parse(xml_file)
+
     el = doc.getDocumentElement()
     output(el)
 
 t2 = time.time()
-print(count, "iterations in", t2-t, "seconds")
+print(count, "iterations in", t2 - t1, "seconds")
 
 shutdownJVM()

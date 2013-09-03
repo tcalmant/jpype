@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 #*****************************************************************************
 #   Copyright 2004-2008 Steve Menard
 #
@@ -14,8 +16,10 @@
 #   limitations under the License.
 #
 #*****************************************************************************
+
 import unittest
-from jpypetest import *
+from jpypetest import numeric, attr, array, objectwrapper, proxy, exc, \
+	serial, mro
 
 import jpype
 import os.path
@@ -39,17 +43,15 @@ def runTest() :
 	jpype.startJVM(jpype.getDefaultJVMPath(),
 				   "-ea", "-Xmx256M", "-Xms64M",
 				   "-Djava.class.path={0}" \
-				   .format(os.path.join("classes", root, "classes")))
+				   .format(os.path.join(root, "classes")))
 
 	runner = unittest.TextTestRunner()
 	runner.run(suite())
 
 	s = slice(2, 4)
-	print(("{0} {1}".format(s, dir(s))))
+	print("{0} {1}".format(s, dir(s)))
 
 	jpype.shutdownJVM()
 
 if __name__ == '__main__' :
 	runTest()
-
-

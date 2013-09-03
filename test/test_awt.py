@@ -1,5 +1,7 @@
-from jpype import *
-import time
+#!/usr/bin/env python3
+
+from jpype import java, javax, JException, startJVM, setupGuiEnvironment, \
+	shutdownGuiEnvironment, getDefaultJVMPath
 
 def run():
 	print('Thread started')
