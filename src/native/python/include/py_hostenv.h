@@ -22,6 +22,15 @@ class PythonHostEnvironment : public HostEnvironment
 public :
 	PythonHostEnvironment()
 	{
+		m_SpecialConstructorKey = 0;
+		m_ProxyClass = 0;
+		m_JavaLangObject = 0;
+		m_GetArrayClassMethod = 0;
+		m_GetClassMethod = 0;
+		m_StringWrapperClass = 0;
+		m_WrapperClass = 0;
+		m_JavaArrayClass = 0;
+		m_JavaExceptionClass = 0;
 	}
 	
 	virtual ~PythonHostEnvironment()

@@ -24,7 +24,7 @@
 #define JPYPE_TRACING_OUTPUT cerr
 
 #define TRACE_IN(n) JPypeTracer _trace(n); try {
-#define TRACE_OUT } catch(...) { _trace.gotError(); throw; }
+#define TRACE_OUT } catch(...) { _trace.gotError(); throw; };
 #define TRACE1(m) _trace.trace(m)
 #define TRACE2(m,n) _trace.trace(m,n)
 #define TRACE3(m,n,o) _trace.trace(m,n,o)
@@ -46,7 +46,7 @@
 
 #ifdef WIN32
 	#ifdef __GNUC__
-		// JNICALL causes problem for funtions prototypes .. since I am nto defining any JNI methods there isno need for it
+		// JNICALL causes problem for functions prototypes .. since I am not defining any JNI methods there is no need for it
 		#undef JNICALL
 		#define JNICALL
 	#endif

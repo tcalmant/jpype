@@ -1,5 +1,5 @@
 /*****************************************************************************
-   Copyright 2004 Steve Ménard
+   Copyright 2004 Steve Mï¿½nard
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ public :
 	{
 		jvm = vm;
 		convertStringObjects = true;
+		referenceQueue = 0;
 	}	
 
 	virtual ~JPJavaEnv() {}

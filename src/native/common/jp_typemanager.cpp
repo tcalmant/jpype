@@ -1,5 +1,5 @@
 /*****************************************************************************
-   Copyright 2004 Steve Ménard
+   Copyright 2004 Steve Mï¿½nard
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@
 typedef map<JPTypeName::ETypes, JPType*> TypeMap;
 typedef map<string, JPClass* > JavaClassMap;
 typedef map<string, JPArrayClass* > JavaArrayClassMap;
-
-static JavaArrayClassMap javaArrayClassMap;
 
 // Warning: this eliminates "static initalization order" problem but should also be guarded with a lock for MT
 template <class _T> _T& GetMap()

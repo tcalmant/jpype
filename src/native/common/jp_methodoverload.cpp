@@ -18,7 +18,13 @@
 
 JPMethodOverload::JPMethodOverload()
 {
-	m_Method = NULL;
+	m_Method = 0;
+	m_MethodID = 0;
+	m_Class = 0;
+
+	m_IsConstructor = false;
+	m_IsFinal = false;
+	m_IsStatic = false;
 }
 
 JPMethodOverload::JPMethodOverload(const JPMethodOverload& o) :

@@ -1,5 +1,5 @@
 /*****************************************************************************
-   Copyright 2004 Steve Ménard
+   Copyright 2004 Steve Mï¿½nard
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@
 
 JPField::JPField()
 {
+	m_Class = 0;
+	m_Field = 0;
+	m_IsFinal = false;
+	m_IsStatic = false;
+	m_FieldID = 0;
 }
 
 JPField::JPField(JPClass* clazz, jobject fld)

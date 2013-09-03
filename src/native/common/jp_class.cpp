@@ -19,8 +19,9 @@
 JPClass::JPClass(const JPTypeName& n, jclass c) : 
 	JPClassBase(n, c),
 	m_SuperClass(NULL),
-	m_Constructors(NULL)	
+	m_Constructors(NULL)
 {
+	m_IsInterface = false;
 }
 
 JPClass::~JPClass()
