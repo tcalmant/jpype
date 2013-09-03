@@ -30,20 +30,21 @@ def output(el, prefix="") :
     if not Element.__isinstance__(el) :
         return
 
-    print("{0}<{1}".format(prefix, el.getTagName()), end='')
+    # print("{0}<{1}".format(prefix, el.getTagName()), end='')
 
     atts = el.getAttributes()
     for i in range(atts.getLength()) :
-        a = atts.item(i);
-        print(' {0}="{1}"'.format(a.getNodeName(), a.getNodeValue()), end='')
+        _ = atts.item(i)
+        # a = atts.item(i)
+        # print(' {0}="{1}"'.format(a.getNodeName(), a.getNodeValue()), end='')
 
-    print('>')
+    # print('>')
 
     nl = el.getChildNodes()
     for i in range(nl.getLength()) :
         output(nl.item(i), prefix + "  ")
 
-    print("{0}</{1}>".format(prefix, el.getTagName()))
+    # print("{0}</{1}>".format(prefix, el.getTagName()))
 
 
 # Compute the XML file path

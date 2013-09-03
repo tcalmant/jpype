@@ -25,20 +25,21 @@ def output(el, prefix="") :
     if el.nodeType != el.ELEMENT_NODE :
         return
 
-    print("{0}<{1}".format(prefix, el.tagName), end='')
+    # print("{0}<{1}".format(prefix, el.tagName), end='')
 
     atts = el.attributes
     for i in range(atts.length) :
-        a = atts.item(i);
-        print(' {0}="{1}"'.format(a.nodeName, a.nodeValue), end='')
+        _ = atts.item(i)
+        # a = atts.item(i)
+        # print(' {0}="{1}"'.format(a.nodeName, a.nodeValue), end='')
 
-    print('>')
+    # print('>')
 
     nl = el.childNodes
     for i in range(nl.length) :
         output(nl.item(i), prefix + "  ")
 
-    print("{0}</{1}>".format(prefix, el.tagName))
+    # print("{0}</{1}>".format(prefix, el.tagName))
 
 
 # Compute the XML file path
