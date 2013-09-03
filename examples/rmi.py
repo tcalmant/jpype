@@ -12,20 +12,28 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
+#
 #*****************************************************************************
 
-#the hava classes used are defined the the test harness. the class jpype.rmi.ServerImpl must be started before this script can be run.
+print('-' * 70)
+print("The java classes used are defined in the test harness.")
+print("The class jpype.rmi.ServerImpl must be started before this script can "
+      "be run.")
+print('-' * 70)
 
-from jpype import *
-
+from jpype import java, startJVM, shutdownJVM, getDefaultJVMPath
 import os.path
+
+# Compute paths
 root = os.path.abspath(os.path.dirname(__file__))
-startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path=%s/../test/classes" % root)
+classes = os.path.abspath(os.path.join(root, '..', 'test', 'classes'))
+
+startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path={0}".format(classes))
 
 p = java.rmi.Naming.lookup("rmi://localhost:2004/server")
 
-print p, p.__class__
+print("p           =", p)
+print("p.__class__ =", p.__class__)
 
 p.callRemote()
 
