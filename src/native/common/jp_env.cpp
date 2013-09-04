@@ -16,6 +16,12 @@
 *****************************************************************************/   
 #include <jpype.h>
 
+/*
+ * FIXME: use a less coupled way to call PyGILState_Ensure/Release() in
+ * JPCleaner::~JPCleaner().
+ */
+#include <Python.h>
+
 HostEnvironment* JPEnv::s_Host = NULL;
 JPJavaEnv*       JPEnv::s_Java = NULL;
 
@@ -175,7 +181,10 @@ JPCleaner::JPCleaner()
 JPCleaner::~JPCleaner()
 {
 //AT's comments on porting:
-// A variety of Unix compilers do not allow redifinition of the same variable in "for" cycless
+// A variety of Unix compilers do not allow redefinition of the same variable in "for" cycless
+
+	PyGILState_STATE state = PyGILState_Ensure();
+
 	vector<jobject>::iterator cur;
 	for (cur = m_GlobalJavaObjects.begin(); cur != m_GlobalJavaObjects.end(); cur++)
 	{
@@ -191,6 +200,8 @@ JPCleaner::~JPCleaner()
 	{
 		(*cur2)->release();
 	}
+
+	PyGILState_Release(state);
 }
 
 void JPCleaner::addGlobal(jobject obj)
