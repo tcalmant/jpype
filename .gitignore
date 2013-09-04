@@ -11,9 +11,9 @@ build/
 dist/
 
 # Eclipse build directory
+.settings/
 Debug/
 Release/
 bin/
 classes/
-
 
