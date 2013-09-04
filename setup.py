@@ -439,7 +439,7 @@ jpypeLib = Extension(name="_jpype", **config.configuration)
 # Setup the package
 setup(
     name="JPype1-py3",
-    version="0.5.5",
+    version="0.5.5.1",
     description="Python-Java bridge. Fork of the jPype project by "
     "Steve Menard (http://jpype.sourceforge.net/), with the "
     "modifications applied by Luis Nell "
