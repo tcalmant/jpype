@@ -443,7 +443,7 @@ EMatchType JPLongType::canConvertToJava(HostRef* obj)
 jvalue JPLongType::convertToJava(HostRef* obj)
 {
 	JPCleaner cleaner;
-	jvalue res;
+	jvalue res = {0};
 	if (JPEnv::getHost()->isInt(obj))
 	{
 		res.j = (jlong)JPEnv::getHost()->intAsInt(obj);
