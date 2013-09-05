@@ -1,2 +1,4 @@
-include *.txt
+include LICENSE.txt
 include README.rst
+graft src/native/common/include
+graft src/native/python/include
