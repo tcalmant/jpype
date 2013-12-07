@@ -120,7 +120,7 @@ class JDKFinder(object):
             return
 
         # Possible JDK folder names
-        possible_names = ('jdk', 'java')
+        possible_names = ('jdk', 'java', 'icedtea')
 
         # Construct the full path
         java_home = os.path.realpath(java_home)
