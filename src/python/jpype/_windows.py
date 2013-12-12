@@ -36,12 +36,18 @@ class WindowsJVMFinder(_jvmfinder.JVMFinder):
         self._libfile = "jvm.dll"
 
         # Predefined locations
-        self._locations = {
-                   # 32 bits (or none on 32 bits OS) JDK
-                   os.path.join(os.environ['ProgramFiles(x86)'], "Java"),
-                   # 64 bits (or 32 bits on 32 bits OS) JDK
-                   os.path.join(os.environ['ProgramFiles'], "Java")
-                   }
+        self._locations = set()
+        for key in (# 64 bits (or 32 bits on 32 bits OS) JDK
+                    'ProgramFiles'
+                    # 32 bits JDK on 32 bits OS
+                    'ProgramFiles(x86)'):
+            try:
+                env_folder = os.environ[key]
+                self._locations.add(os.path.join(env_folder, "Java"),)
+
+            except KeyError:
+                # Environment variable is missing (ignore)
+                pass
 
         # Search methods
         self._methods = (self._get_from_java_home,
@@ -53,7 +59,7 @@ class WindowsJVMFinder(_jvmfinder.JVMFinder):
         """
         Retrieves the path to the default Java installation stored in the
         Windows registry
-        
+
         :return: The path found in the registry, or None
         """
         try :

@@ -191,13 +191,17 @@ class WindowsJDKFinder(JDKFinder):
             return java_home
 
         # Try with known locations
-        # 32 bits (or none on 32 bits OS) JDK
-        possible_homes = glob(os.path.join(os.environ['ProgramFiles(x86)'],
+        # 64 bits (or 32 bits on 32 bits OS) JDK
+        possible_homes = glob(os.path.join(os.environ['ProgramFiles'],
                                            "Java", "*"))
 
-        # 64 bits (or 32 bits on 32 bits OS) JDK
-        possible_homes += glob(os.path.join(os.environ['ProgramFiles'],
-                                            "Java", "*"))
+        try:
+            # 32 bits (or none on 32 bits OS) JDK
+            possible_homes += glob(os.path.join(os.environ['ProgramFiles(x86)'],
+                                                "Java", "*"))
+        except KeyError:
+            # Environment variable doesn't exist on Windows 32 bits
+            pass
 
         # Compute the real home folder
         java_home = self.check_homes(possible_homes)
