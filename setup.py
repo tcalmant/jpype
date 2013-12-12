@@ -262,6 +262,7 @@ class DarwinJDKFinder(JDKFinder):
         self.configuration['library_dirs'] = [os.path.join(java_home, 'lib')]
         self.configuration['include_dirs'] += [
             os.path.join(java_home, 'include'),
+            os.path.join(java_home, 'include', 'darwin'),
         ]
 
 
