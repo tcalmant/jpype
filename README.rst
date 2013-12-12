@@ -68,7 +68,7 @@ first:
 Red Hat/Fedora
 ==============
 
-Same thing with Fedora users :
+Same thing with Fedora users:
 
 .. code-block:: bash
 
@@ -78,7 +78,8 @@ Same thing with Fedora users :
 Windows
 =======
 
-On Windows, you will have to install :
+On Windows, you will have to install:
+
 * `Oracle JDK <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_
 * `Visual C++ Express 2010 <http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4>`_ (which is free)
 
@@ -122,7 +123,18 @@ This happens mostly due to the setup not being able to find your
 Tested on
 *********
 
-* Mac OS X 10.8.4, with Oracle JDK 1.6.0 and 1.7.0
-* Ubuntu 12.04, 64 bits, with OpenJDK 6 and 7
-* Fedora 18 and 19, 64 bits, with OpenJDK 6 and 7
-* Windows 7, 32 bits, with Oracle JDK 7
++-----------------+--------------+----------------------------+
+| OS              | Architecture | Java version               |
++=================+==============+============================+
+| Fedora 18       | 64 bits      | OpenJDK 6 and 7            |
++-----------------+--------------+----------------------------+
+| Fedora 19       | 64 bits      | OpenJDK 6 and 7            |
++-----------------+--------------+----------------------------+
+| Ubuntu 12.04    | 64 bits      | OpenJDK 6 and 7            |
++-----------------+--------------+----------------------------+
+| Mac OS X 10.8.4 | 64 bits      | Oracle JDK 6 and 7         |
++-----------------+--------------+----------------------------+
+| Mac OS X 10.9   | 64 bits      | Oracle JDK 6 and 7         |
++-----------------+--------------+----------------------------+
+| Windows 7       | 32 bits      | Oracle JDK 7 and OpenJDK 7 |
++-----------------+--------------+----------------------------+
