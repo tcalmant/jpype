@@ -75,14 +75,31 @@ Same thing with Fedora users :
     su -c 'yum install gcc-c++ python3-devel'
 
 
+Windows
+=======
+
+On Windows, you will have to install :
+* Java JDK, from
+  `http://www.oracle.com/technetwork/java/javase/downloads/index.html`_
+* Visual C++ Express 2010 (which is free), from
+  `http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4`_
+
+
 Installation
 ************
 
-Should be easy as
+On Linux:
 
 .. code-block:: bash
 
     sudo python3 setup.py install
+
+
+On Windows:
+
+.. code-block:: bash
+
+   python setup.py install
 
 
 If it fails...
@@ -108,5 +125,6 @@ Tested on
 *********
 
 * Mac OS X 10.8.4, with Oracle JDK 1.6.0 and 1.7.0
-* Ubuntu 12.04, with OpenJDK 6 and 7
-* Fedora 18 and 19, with OpenJDK 6 and 7
+* Ubuntu 12.04, 64 bits, with OpenJDK 6 and 7
+* Fedora 18 and 19, 64 bits, with OpenJDK 6 and 7
+* Windows 7, 32 bits, with Oracle JDK 7
