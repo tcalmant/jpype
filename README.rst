@@ -79,10 +79,8 @@ Windows
 =======
 
 On Windows, you will have to install :
-* Java JDK, from
-  `http://www.oracle.com/technetwork/java/javase/downloads/index.html`_
-* Visual C++ Express 2010 (which is free), from
-  `http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4`_
+* `Oracle JDK <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`_
+* `Visual C++ Express 2010 <http://www.visualstudio.com/downloads/download-visual-studio-vs#DownloadFamilies_4>`_ (which is free)
 
 
 Installation
