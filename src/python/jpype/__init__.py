@@ -24,6 +24,10 @@ from ._jexception import *
 from ._core import *
 from ._gui import *
 
+# Module version (same as in the setup file)
+__version_info__ = (0, 5, 5, 2)
+__version__ = ".".join(str(x) for x in __version_info__)
+
 def JIterator(it) :
     """Deprecated"""
     return it
