@@ -12,11 +12,11 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-   
-*****************************************************************************/   
+
+*****************************************************************************/
 #include <jpype.h>
 
-JPClass::JPClass(const JPTypeName& n, jclass c) : 
+JPClass::JPClass(const JPTypeName& n, jclass c) :
 	JPClassBase(n, c),
 	m_SuperClass(NULL),
 	m_Constructors(NULL)
@@ -40,17 +40,17 @@ JPClass::~JPClass()
 
 	for (map<string, JPField*>::iterator fldit = m_InstanceFields.begin(); fldit != m_InstanceFields.end(); fldit++)
 	{
-		delete fldit->second;		
+		delete fldit->second;
 	}
 
 	for (map<string, JPField*>::iterator fldit2 = m_StaticFields.begin(); fldit2 != m_StaticFields.end(); fldit2++)
 	{
-		delete fldit2->second;		
+		delete fldit2->second;
 	}
 
 }
 
-void JPClass::postLoad() 
+void JPClass::postLoad()
 {
 	// Is this an interface?
 	m_IsInterface = JPJni::isInterface(m_Class);
@@ -62,8 +62,8 @@ void JPClass::postLoad()
 	loadConstructors();
 }
 
-void JPClass::loadSuperClass() 
-{	
+void JPClass::loadSuperClass()
+{
 	JPCleaner cleaner;
 
 	// base class .. if any
@@ -72,16 +72,16 @@ void JPClass::loadSuperClass()
 		jclass baseClass = JPEnv::getJava()->GetSuperclass(m_Class);
 		cleaner.addLocal(baseClass);
 
-		if (baseClass != NULL) 
+		if (baseClass != NULL)
 		{
-			JPTypeName baseClassName = JPJni::getName(baseClass);		
+			JPTypeName baseClassName = JPJni::getName(baseClass);
 			m_SuperClass = JPTypeManager::findClass(baseClassName);
 		}
 	}
 }
-	
-void JPClass::loadSuperInterfaces() 
-{	
+
+void JPClass::loadSuperInterfaces()
+{
 	JPCleaner cleaner;
 	// Super interfaces
 	vector<jclass> intf = JPJni::getInterfaces(m_Class);
@@ -95,9 +95,9 @@ void JPClass::loadSuperInterfaces()
 		m_SuperInterfaces.push_back(intf);
 	}
 }
-	
-void JPClass::loadFields() 
-{	
+
+void JPClass::loadFields()
+{
 	JPCleaner cleaner;
 	// fields
 	vector<jobject> fields = JPJni::getDeclaredFields(m_Class);
@@ -108,19 +108,20 @@ void JPClass::loadFields()
 		JPField* field = new JPField(this, *it);
 		if (field->isStatic())
 		{
-			m_StaticFields[field->getName()] = field;  
+			m_StaticFields[field->getName()] = field;
 		}
 		else
 		{
-			m_InstanceFields[field->getName()] = field;  
-		}			
-	}	
+			m_InstanceFields[field->getName()] = field;
+		}
+	}
 }
-	
-void JPClass::loadMethods() 
-{	
+
+void JPClass::loadMethods()
+{
 	JPCleaner cleaner;
 	JPCleaner pcleaner;
+	JPClass*  superclass;
 
 	// methods
 	vector<jobject> methods = JPJni::getDeclaredMethods(m_Class);
@@ -136,37 +137,42 @@ void JPClass::loadMethods()
 			if (method == NULL)
 			{
 				method = new JPMethod(m_Class, name, false);
-				m_Methods[name] = method; 
+				m_Methods[name] = method;
 			}
-			
-			method->addOverload(this, *it);			
-		
-		
-		}
 
-		
+			method->addOverload(this, *it);
+		}
 	}
 
+	/*
+	 * Patch from commit 086a726e40fb107a4e0de60b7381d28e9bb2328e
+	 * at originell/jpype, from baztian/jpype
+	 */
+	superclass = m_SuperClass;
+
 	// add previous overloads to methods defined in THIS class
-	if (m_SuperClass != NULL)
+	while (superclass != NULL)
 	{
 		for (map<string, JPMethod*>::iterator cur = m_Methods.begin(); cur != m_Methods.end(); cur ++)
 		{
 			string name = cur->first;
-			JPMethod* superMethod = m_SuperClass->getMethod(name);
+			JPMethod* superMethod = superclass->getMethod(name);
 			if (superMethod != NULL)
 			{
 				cur->second->addOverloads(superMethod);
 			}
 		}
-	}		
+
+		// Go further in class hierarchy
+		superclass = superclass->getSuperClass();
+	}
 }
 
-void JPClass::loadConstructors() 
+void JPClass::loadConstructors()
 {
 	JPCleaner cleaner;
 
-	m_Constructors = new JPMethod(m_Class, "[init", true); 
+	m_Constructors = new JPMethod(m_Class, "[init", true);
 
 	if (JPJni::isAbstract(m_Class))
 	{
@@ -174,7 +180,7 @@ void JPClass::loadConstructors()
 		return;
 	}
 
-	
+
 	vector<jobject> methods = JPJni::getDeclaredConstructors(m_Class);
 	cleaner.addAllLocal(methods);
 
@@ -215,11 +221,11 @@ JPMethod* JPClass::getMethod(const string& name)
 	{
 		return NULL;
 	}
-	
+
 	return it->second;
 }
 
-HostRef* JPClass::getStaticAttribute(string name) 
+HostRef* JPClass::getStaticAttribute(string name)
 {
 	// static fields 
 	map<string, JPField*>::iterator fld = m_StaticFields.find(name);
@@ -227,13 +233,13 @@ HostRef* JPClass::getStaticAttribute(string name)
 	{
 		return fld->second->getStaticAttribute();
 	}
-		
+
 	JPEnv::getHost()->setAttributeError(name.c_str());
 	JPEnv::getHost()->raise("getAttribute");
 	return NULL; // never reached
 }
 
-HostRef* JPClass::asHostObject(jvalue obj) 
+HostRef* JPClass::asHostObject(jvalue obj)
 {
 	TRACE_IN("JPClass::asPyObject");
 	if (obj.l == NULL)
@@ -247,7 +253,7 @@ HostRef* JPClass::asHostObject(jvalue obj)
 		JPType* arrayType = JPTypeManager::getType(name);
 		return arrayType->asHostObject(obj);
 	}
-	
+
 	return JPEnv::getHost()->newObject(new JPObject(name, obj.l));
 	TRACE_OUT;
 }
@@ -261,8 +267,8 @@ EMatchType JPClass::canConvertToJava(HostRef* obj)
 
 	JPCleaner cleaner;
 
-	string simpleName = m_Name.getSimpleName();	
-	
+	string simpleName = m_Name.getSimpleName();
+
 	if (simpleName == "java.lang.Byte" || simpleName == "java.lang.Short" ||
 	    simpleName == "java.lang.Integer")
 	{
@@ -270,21 +276,21 @@ EMatchType JPClass::canConvertToJava(HostRef* obj)
 		{
 			return _explicit;
 		}
-	}    	
-	
+	}
+
 	if (simpleName == "java.lang.Long" && JPEnv::getHost()->isLong(obj))
 	{
 		return _explicit;
 	}
-	
+
 	if (simpleName == "java.lang.Float" || simpleName == "java.lang.Double")
 	{
 		if (JPEnv::getHost()->isFloat(obj))
 		{
 			return _explicit;
 		}
-	}    	
-		
+	}
+
 	if (JPEnv::getHost()->isObject(obj))
 	{
 		JPObject* o = JPEnv::getHost()->asObject(obj);
@@ -334,13 +340,13 @@ EMatchType JPClass::canConvertToJava(HostRef* obj)
 		{
 			return _implicit;
 		}
-		
+
 		// Strings are objects too
 		if (JPEnv::getHost()->isString(obj))
 		{
 			return _implicit;
 		}
-		
+
 		// Class are objects too
 		if (JPEnv::getHost()->isClass(obj) || JPEnv::getHost()->isArrayClass(obj))
 		{
@@ -352,12 +358,12 @@ EMatchType JPClass::canConvertToJava(HostRef* obj)
 		{
 			return _implicit;
 		}
-		
+
 		if (JPEnv::getHost()->isLong(obj))
 		{
 			return _implicit;
 		}
-		
+
 		if (JPEnv::getHost()->isFloat(obj))
 		{
 			return _implicit;
@@ -375,9 +381,9 @@ EMatchType JPClass::canConvertToJava(HostRef* obj)
 jvalue JPClass::buildObjectWrapper(HostRef* obj)
 {
 	jvalue res;
-	
+
 	JPCleaner cleaner;
-	
+
 	vector<HostRef*> args(1);
 	args.push_back(obj);
 
@@ -402,25 +408,25 @@ jvalue JPClass::convertToJava(HostRef* obj)
 		res.l = NULL;
 	}
 
-	string simpleName = m_Name.getSimpleName();	
+	string simpleName = m_Name.getSimpleName();
 	if (JPEnv::getHost()->isInt(obj) && (simpleName == "java.lang.Byte" || simpleName == "java.lang.Short" ||
 	    simpleName == "java.lang.Integer"))
 	{
 		return buildObjectWrapper(obj);
-	}    	
-	
+	}
+
 	if ((JPEnv::getHost()->isInt(obj) || JPEnv::getHost()->isLong(obj)) && simpleName == "java.lang.Long" && JPEnv::getHost()->isLong(obj))
 	{
 		return buildObjectWrapper(obj);
 	}
-	
+
 	if (JPEnv::getHost()->isFloat(obj) && (simpleName == "java.lang.Float" || simpleName == "java.lang.Double"))
 	{
 		if (JPEnv::getHost()->isFloat(obj))
 		{
 			return buildObjectWrapper(obj);
 		}
-	}    	
+	}
 
 	if (JPEnv::getHost()->isString(obj))
 	{
@@ -452,14 +458,14 @@ jvalue JPClass::convertToJava(HostRef* obj)
 		JPType* t = JPTypeManager::getType(tname);
 		res.l = t->convertToJavaObject(obj);
 	}
-	
+
 	if (JPEnv::getHost()->isLong(obj))
 	{
 		JPTypeName tname = JPTypeName::fromType(JPTypeName::_long);
 		JPType* t = JPTypeManager::getType(tname);
 		res.l = t->convertToJavaObject(obj);
 	}
-	
+
 	if (JPEnv::getHost()->isFloat(obj))
 	{
 		JPTypeName tname = JPTypeName::fromType(JPTypeName::_double);
@@ -477,7 +483,7 @@ jvalue JPClass::convertToJava(HostRef* obj)
 	if (JPEnv::getHost()->isArray(obj) && simpleName == "java.lang.Object")
 	{
 		JPArray* a = JPEnv::getHost()->asArray(obj);
-		res = a->getValue();		
+		res = a->getValue();
 	}
 
 	return res;
@@ -488,7 +494,7 @@ JPObject* JPClass::newInstance(vector<HostRef*>& args)
 	return m_Constructors->invokeConstructor(args);
 }
 
-void JPClass::setStaticAttribute(string name, HostRef* val) 
+void JPClass::setStaticAttribute(string name, HostRef* val)
 {
 	map<string, JPField*>::iterator it = m_StaticFields.find(name);
 	if (it == m_StaticFields.end())
@@ -496,7 +502,7 @@ void JPClass::setStaticAttribute(string name, HostRef* val)
 		JPEnv::getHost()->setAttributeError(name.c_str());
 		JPEnv::getHost()->raise("__setattr__");
 	}
-		
+
 	it->second->setStaticAttribute(val);
 }
 

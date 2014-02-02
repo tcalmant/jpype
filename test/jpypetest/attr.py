@@ -132,8 +132,8 @@ class AttributeTestCase(common.JPypeTestCase) :
         h = self.__jp.Test1()
         h.charValue = 'b'
 
-        print((h.charValue))
-        print((repr(h.charValue)))
+        print(h.charValue)
+        print(repr(h.charValue))
 
         assert h.charValue == 'b'
 
@@ -182,3 +182,10 @@ class AttributeTestCase(common.JPypeTestCase) :
 #             print "converted to String in", (stop-start), 'ms', len(cs), cs
 #       finally :
 #          jpype.ConversionConfig.string = True
+
+
+    def testComplexMethodOvlerloading(self) :
+        c = self.__jp.TestOverloadC()
+        print(c.foo(1))
+        assert c.foo(1) == "foo(int) in C: 1"
+        assert c.foo() == "foo() in A"
