@@ -1,7 +1,9 @@
 # Python files
 __pycache__/
 *.pyc
+*.pyd
 *.egg-info
+*.so
 
 # File generated during tests
 testSerial.dat
