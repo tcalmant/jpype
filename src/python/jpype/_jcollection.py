@@ -17,6 +17,23 @@
 from . import _jclass
 import collections
 
+class _WrappedIterator(object):
+    """
+    Wraps a Java iterator to respect the Python 3 iterator API
+    """
+    def __init__(self, iterator):
+        self.iterator = iterator
+
+    def __iter__(self):
+        return self.iterator
+
+    def __next__(self):
+        return self.iterator.next()
+
+    # Compatibility name
+    next = __next__
+
+
 def _initialize() :
     _jclass.registerClassCustomizer(CollectionCustomizer())
     _jclass.registerClassCustomizer(ListCustomizer())
@@ -170,7 +187,7 @@ def _mapLength(self) :
     return self.size()
 
 def _mapIter(self) :
-    return self.keySet().iterator()
+    return _WrappedIterator(self.keySet().iterator())
 
 def _mapDelItem(self, i) :
     return self.remove(i)
