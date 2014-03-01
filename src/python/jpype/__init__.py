@@ -28,9 +28,5 @@ from ._gui import *
 __version_info__ = (0, 5, 5, 2)
 __version__ = ".".join(str(x) for x in __version_info__)
 
-def JIterator(it) :
-    """Deprecated"""
-    return it
-
 java = JPackage("java")
 javax = JPackage("javax")
