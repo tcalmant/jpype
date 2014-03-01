@@ -51,7 +51,7 @@ def _colLength(self) :
     return self.size()
 
 def _colIter(self) :
-    return self.iterator()
+    return _WrappedIterator(self.iterator())
 
 def _colDelItem(self, i) :
     return self.remove(i)
@@ -228,9 +228,14 @@ class MapCustomizer(object) :
                 members["_putAll"] = members["putAll"]
                 members["putAll"] = _mapPutAll
 
-def _iterNext(self) :
+def _iterCustomNext(self) :
     if self.hasNext() :
         return self._next()
+    raise StopIteration
+
+def _iterIteratorNext(self):
+    if self.hasNext():
+        return self.next()
     raise StopIteration
 
 def _iterIter(self) :
@@ -239,6 +244,7 @@ def _iterIter(self) :
 class IteratorCustomizer(object) :
     _METHODS = {
         '__iter__' : _iterIter,
+        '__next__' : _iterIteratorNext,
     }
 
     def canCustomize(self, name, jc) :
@@ -249,9 +255,14 @@ class IteratorCustomizer(object) :
     def customize(self, name, jc, bases, members) :
         if name == 'java.util.Iterator' :
             members.update(IteratorCustomizer._METHODS)
-        elif jc.isSubclass('java.util.Iterator') and 'next' in members:
-            members['_next'] = members['next']
-            members['next'] = _iterNext
+        elif jc.isSubclass('java.util.Iterator'):
+            if 'next' in members:
+                members['_next'] = members['next']
+
+            elif '__next__' in members:
+                members['_next'] = members['__next__']
+
+            members['__next__'] = _iterCustomNext
 
 def _enumNext(self) :
     if self.hasMoreElements() :
@@ -265,6 +276,7 @@ def _enumIter(self) :
 class EnumerationCustomizer(object) :
     _METHODS = {
         'next' : _enumNext,
+        '__next__' : _enumNext,
         '__iter__' : _enumIter,
     }
 
