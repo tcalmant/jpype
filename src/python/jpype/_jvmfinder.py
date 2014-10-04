@@ -71,24 +71,28 @@ class JVMFinder(object):
         """
         homes = []
         java_names = ('jre', 'jdk', 'java')
-
         for parent in parents:
-            for childname in sorted(os.listdir(parent)):
-                # Compute the real path
-                path = os.path.realpath(os.path.join(parent, childname))
-                if path in homes or not os.path.isdir(path):
-                    # Already known path, or not a directory -> ignore
-                    continue
+            try:
+                children = sorted(os.listdir(parent))
+            except OSError:
+                # Folder doesn't exist
+                pass
+            else:
+                for childname in children:
+                    # Compute the real path
+                    path = os.path.realpath(os.path.join(parent, childname))
+                    if path in homes or not os.path.isdir(path):
+                        # Already known path, or not a directory -> ignore
+                        continue
 
-                # Check if the path seems OK
-                real_name = os.path.basename(path).lower()
-                for java_name in java_names:
-                    if java_name in real_name:
-                        # Correct JVM folder name
-                        homes.append(path)
-                        yield path
-                        break
-
+                    # Check if the path seems OK
+                    real_name = os.path.basename(path).lower()
+                    for java_name in java_names:
+                        if java_name in real_name:
+                            # Correct JVM folder name
+                            homes.append(path)
+                            yield path
+                            break
 
     def get_jvm_path(self):
         """
@@ -100,15 +104,12 @@ class JVMFinder(object):
         for method in self._methods:
             try:
                 jvm = method()
-
             except NotImplementedError:
                 # Ignore missing implementations
                 pass
-
             else:
                 if jvm is not None:
                     return jvm
-
         else:
             raise ValueError("No JVM shared library file ({0}) found. "
                              "Try setting up the JAVA_HOME environment "
