@@ -444,15 +444,15 @@ class LinuxJDKFinder(JDKFinder):
 # ------------------------------------------------------------------------------
 
 try:
-    if sys.platform == 'win32':
+    if sys.platform in ('win32', 'cygwin'):
+        # Windows / Cygwin
         config = WindowsJDKFinder()
-
     elif sys.platform == 'darwin':
+        # MAC OS X
         config = DarwinJDKFinder()
-
     else:
+        # Linux / POSIX
         config = LinuxJDKFinder()
-
 except NoJDKError as ex:
     raise RuntimeError(
                 "No Java/JDK could be found. I looked in the following "
