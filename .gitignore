@@ -12,7 +12,8 @@ testSerial.dat
 build/
 dist/
 
-# Eclipse build directory
+# IDE build directory
+.idea/
 .settings/
 Debug/
 Release/
