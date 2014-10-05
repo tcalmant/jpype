@@ -36,13 +36,9 @@ import sys
 import platform
 from glob import glob
 
-try:
-    from setuptools import setup
-    from setuptools import Extension
-
-except ImportError:
-    from distutils.core import setup
-    from distutils.core import Extension
+from setuptools import setup
+from setuptools import Extension
+from setuptools.command.build_ext import build_ext
 
 # ------------------------------------------------------------------------------
 
@@ -441,15 +437,33 @@ class LinuxJDKFinder(JDKFinder):
             visited_folders.extend(possible_homes)
             raise NoJDKError(visited_folders)
 
+class CygwinFinder(JDKFinder):
+    def __init__(self):
+        # Basic configuration
+        JDKFinder.__init__(self)
+        self.configuration['libraries'] = ['dl']
+
+        # Look for the JDK home folder, the Linux way
+        java_home = LinuxJDKFinder.find_jdk_home(self)
+
+        # Home-based configuration
+        self.configuration['library_dirs'] = [os.path.join(java_home, 'lib')]
+        self.configuration['include_dirs'] += [
+            os.path.join(java_home, 'include'),
+            os.path.join(java_home, 'include', 'win32')
+        ]
+
 # ------------------------------------------------------------------------------
 
 try:
-    if sys.platform in ('win32', 'cygwin'):
-        # Windows / Cygwin
+    if sys.platform == 'win32':
+        # Windows
         config = WindowsJDKFinder()
     elif sys.platform == 'darwin':
         # MAC OS X
         config = DarwinJDKFinder()
+    elif sys.platform == 'cygwin':
+        config = CygwinFinder()
     else:
         # Linux / POSIX
         config = LinuxJDKFinder()
@@ -466,6 +480,48 @@ except NoJDKError as ex:
                 "pull request with a fix on github:\n"
                 "https://github.com/tcalmant/jpype/"
                 .format('\n'.join(ex.possible_homes)))
+
+# ------------------------------------------------------------------------------
+
+class CustomBuildExt(build_ext):
+    """
+    Custom build process to handle different compilers
+    """
+    compile_args = {
+        'msvc': ['/EHsc'],
+        'gcc': [],
+        'mingw32': []
+    }
+
+    linker_args = {
+        'mingw32': []
+    }
+
+    def initialize_options(self, *args):
+        """
+        Omit -Wstrict-prototypes from CFLAGS since its only valid for C code
+        """
+        from distutils.sysconfig import get_config_vars
+        opt = get_config_vars('OPT')[0]
+        if opt:
+            os.environ['OPT'] = ' '.join(flag for flag in opt.split()
+                                         if flag != '-Wstrict-prototypes')
+        build_ext.initialize_options(self)
+
+    def build_extensions(self):
+        """
+        Sets up the compiler arguments
+        """
+        compiler = self.compiler.compiler_type
+        if compiler in self.compile_args:
+            for ext in self.extensions:
+                ext.extra_compile_args = self.compile_args[compiler]
+
+        if compiler in self.linker_args:
+            for ext in self.extensions:
+                ext.extra_link_args = self.linker_args[compiler]
+        
+        build_ext.build_extensions(self)
 
 # ------------------------------------------------------------------------------
 
@@ -506,5 +562,6 @@ setup(
         "jpype": os.path.join("src", "python", "jpype"),
         'jpypex': os.path.join("src", "python", "jpypex"),
     },
+    # cmdclass={'build_ext': CustomBuildExt},
     ext_modules=[jpypeLib],
 )
