@@ -437,8 +437,18 @@ class LinuxJDKFinder(JDKFinder):
             visited_folders.extend(possible_homes)
             raise NoJDKError(visited_folders)
 
+
 class CygwinFinder(JDKFinder):
+    """
+    Linux specific JDK Finder. Works like the Linux finder, with specific
+    include directories
+    """
     def __init__(self):
+        """
+        Sets up the basic configuration
+
+        :raise ValueError: No JDK installation found
+        """
         # Basic configuration
         JDKFinder.__init__(self)
         self.configuration['libraries'] = ['dl']
@@ -450,6 +460,7 @@ class CygwinFinder(JDKFinder):
         self.configuration['library_dirs'] = [os.path.join(java_home, 'lib')]
         self.configuration['include_dirs'] += [
             os.path.join(java_home, 'include'),
+            os.path.join('src', 'native', 'cygwin'),
             os.path.join(java_home, 'include', 'win32')
         ]
 
@@ -463,6 +474,7 @@ try:
         # MAC OS X
         config = DarwinJDKFinder()
     elif sys.platform == 'cygwin':
+        # Cygwin on Windows
         config = CygwinFinder()
     else:
         # Linux / POSIX
@@ -497,21 +509,20 @@ class CustomBuildExt(build_ext):
         'mingw32': []
     }
 
-    def initialize_options(self, *args):
-        """
-        Omit -Wstrict-prototypes from CFLAGS since its only valid for C code
-        """
-        from distutils.sysconfig import get_config_vars
-        opt = get_config_vars('OPT')[0]
-        if opt:
-            os.environ['OPT'] = ' '.join(flag for flag in opt.split()
-                                         if flag != '-Wstrict-prototypes')
-        build_ext.initialize_options(self)
+    ignored_arguments = (
+        '-Wstrict-prototypes',
+        '-Wimplicit-function-declaration'
+    )
 
     def build_extensions(self):
         """
         Sets up the compiler arguments
         """
+        self.compiler.compiler = [arg for arg in self.compiler.compiler
+                                  if arg not in self.ignored_arguments]
+        self.compiler.compiler_so = [arg for arg in self.compiler.compiler_so
+                                     if arg not in self.ignored_arguments]
+
         compiler = self.compiler.compiler_type
         if compiler in self.compile_args:
             for ext in self.extensions:
@@ -562,6 +573,6 @@ setup(
         "jpype": os.path.join("src", "python", "jpype"),
         'jpypex': os.path.join("src", "python", "jpypex"),
     },
-    # cmdclass={'build_ext': CustomBuildExt},
+    cmdclass={'build_ext': CustomBuildExt},
     ext_modules=[jpypeLib],
 )
