@@ -92,7 +92,7 @@ def get_default_jvm_path():
     :return: The path to the JVM shared library file
     :raise ValueError: No JVM library found
     """
-    if sys.platform in ("win32", "cygwin"):
+    if sys.platform in "win32":
         # Windows or Cygwin
         from ._windows import WindowsJVMFinder
         finder = WindowsJVMFinder()
@@ -100,6 +100,10 @@ def get_default_jvm_path():
         # Mac OS X
         from ._darwin import DarwinJVMFinder
         finder = DarwinJVMFinder()
+    elif sys.platform == "cygwin":
+        # Cygwin
+        from ._cygwin import CygwinJVMFinder
+        finder = CygwinJVMFinder()
     else:
         # Use the Linux way for other systems
         from ._linux import LinuxJVMFinder
