@@ -144,3 +144,13 @@ class JVMFinder(object):
             jvm = self.find_libjvm(home)
             if jvm is not None:
                 return jvm
+
+    def get_boot_arguments(self, jvm_lib_path):
+        """
+        Prepares the OS specific arguments required to start the JVM.
+
+        :param jvm_lib_path: Path to the JVM library
+        :return: The list of arguments to add for the JVM to start
+        :raise OSError: Can't find required files
+        """
+        return []

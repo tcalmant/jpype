@@ -17,8 +17,23 @@
 
 from . import _jvmfinder
 import os
+import subprocess
 
 # ------------------------------------------------------------------------------
+
+def cygwin_to_windows(cygwin_path):
+    """
+    Uses ``cygpath`` to convert a Cygwin path to a Windows path
+
+    :param cygwin_path: The Cygwin path to convert
+    :return: The corresponding Windows path
+    """
+    process = subprocess.Popen(['cygpath', '-w', cygwin_path],
+                               stdout=subprocess.PIPE)
+    return str(process.stdout.readline(), 'UTF-8').strip()
+
+# ------------------------------------------------------------------------------
+
 
 class CygwinJVMFinder(_jvmfinder.JVMFinder):
     """
@@ -51,3 +66,44 @@ class CygwinJVMFinder(_jvmfinder.JVMFinder):
         # Search methods
         self._methods = (self._get_from_java_home,
                          self._get_from_known_locations)
+
+    def get_boot_arguments(self, jvm_lib_path):
+        """
+        Prepares the arguments required to start a JVM in Cygwin.
+
+        :param jvm_lib_path: Path to the jvm.dll file, Cygwin style
+        :return: The list of arguments to add for the JVM to start
+        :raise OSError: Can't find required files
+        """
+        parts = jvm_lib_path.lower().split(os.sep)
+        for idx, part in enumerate(reversed(parts)):
+            if 'jre' in part or 'jdk' in part:
+                break
+        else:
+            raise OSError("Can't find the root jre nor jdk folder.")
+
+        # Compute the root folder
+        java_home = os.path.sep.join([] + parts[:-idx])
+
+        # Look for zip.dll and rt.jar
+        library_path = None
+        boot_classpath = None
+        for root, _, filenames in os.walk(java_home):
+            if "zip.dll" in filenames:
+                # Found the library folder, store the folder Windows path
+                library_path = cygwin_to_windows(root)
+                if boot_classpath is not None:
+                    break
+            elif "rt.jar" in filenames:
+                # Found the core JAR file, store the whole Windows path
+                boot_classpath = cygwin_to_windows(os.path.join(root, "rt.jar"))
+                if library_path is not None:
+                    break
+        else:
+            raise OSError("A folder has not been found: library path='{0}' -- "
+                          "boot path='{1}'"
+                          .format(library_path, boot_classpath))
+
+        # Return the result as JVM properties
+        return ['-Dsun.boot.library.path={0}'.format(library_path),
+                '-Xbootclasspath:{0}'.format(boot_classpath)]

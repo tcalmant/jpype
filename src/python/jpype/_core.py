@@ -40,8 +40,22 @@ def setUsePythonThreadForDeamon(v):
 def isJVMStarted() :
     return _jpype.isStarted()
 
+
 def startJVM(jvm, *args) :
-    _jpype.startup(jvm, tuple(args), True)
+    """
+    Starts a Java Virtual Machine
+
+    :param jvm:  Path to the jvm library file (libjvm.so, jvm.dll, ...)
+    :param args: Arguments to give to the JVM
+    """
+    # Insert OS specific arguments first
+    finder = get_jvm_finder()
+    args = tuple(finder.get_boot_arguments(jvm) + list(args))
+
+    # Start the JVM
+    _jpype.startup(jvm, args, True)
+
+    # Initialize jPype
     _jclass._initialize()
     _jarray._initialize()
     _jwrapper._initialize()
@@ -53,7 +67,7 @@ def startJVM(jvm, *args) :
     nio._initialize()
     reflect._initialize()
 
-    # start the reference deamon thread
+    # start the reference daemon thread
     if _usePythonThreadForDaemon :
         _refdaemon.startPython()
     else:
@@ -85,6 +99,30 @@ def detachThreadFromJVM() :
     _jpype.detachThreadFromJVM()
 
 
+def get_jvm_finder():
+    """
+    Returns a JVM Finder matching the operating system
+
+    :return: A JVMFinder object
+    """
+    if sys.platform in "win32":
+        # Windows
+        from ._windows import WindowsJVMFinder
+        return WindowsJVMFinder()
+    elif sys.platform == "darwin":
+        # Mac OS X
+        from ._darwin import DarwinJVMFinder
+        return DarwinJVMFinder()
+    elif sys.platform == "cygwin":
+        # Cygwin
+        from ._cygwin import CygwinJVMFinder
+        return CygwinJVMFinder()
+    else:
+        # Use the Linux way for other systems
+        from ._linux import LinuxJVMFinder
+        return LinuxJVMFinder()
+
+
 def get_default_jvm_path():
     """
     Retrieves the path to the default or first found JVM library
@@ -92,24 +130,7 @@ def get_default_jvm_path():
     :return: The path to the JVM shared library file
     :raise ValueError: No JVM library found
     """
-    if sys.platform in "win32":
-        # Windows or Cygwin
-        from ._windows import WindowsJVMFinder
-        finder = WindowsJVMFinder()
-    elif sys.platform == "darwin":
-        # Mac OS X
-        from ._darwin import DarwinJVMFinder
-        finder = DarwinJVMFinder()
-    elif sys.platform == "cygwin":
-        # Cygwin
-        from ._cygwin import CygwinJVMFinder
-        finder = CygwinJVMFinder()
-    else:
-        # Use the Linux way for other systems
-        from ._linux import LinuxJVMFinder
-        finder = LinuxJVMFinder()
-
-    return finder.get_jvm_path()
+    return get_jvm_finder().get_jvm_path()
 
 # Naming compatibility
 getDefaultJVMPath = get_default_jvm_path
