@@ -49,6 +49,7 @@ if sys.version_info[0] < 3:
 
 # ------------------------------------------------------------------------------
 
+
 class NoJDKError(Exception):
     """
     No JDK found
@@ -62,10 +63,8 @@ class NoJDKError(Exception):
         # Normalize possible homes -> always give an iterable or None
         if not possible_homes:
             self.possible_homes = []
-
         elif not isinstance(possible_homes, (list, tuple)):
             self.possible_homes = [possible_homes]
-
         else:
             self.possible_homes = possible_homes
 
@@ -79,12 +78,12 @@ class JDKFinder(object):
         Sets up the basic configuration
         """
         self.configuration = {
-          'include_dirs': [
-                           os.path.join('src', 'native', 'common', 'include'),
-                           os.path.join('src', 'native', 'python', 'include'),
-                           ],
-          'sources': self.find_sources()}
-
+            'include_dirs': [
+                os.path.join('src', 'native', 'common', 'include'),
+                os.path.join('src', 'native', 'python', 'include'),
+            ],
+            'sources': self.find_sources()
+        }
 
     def find_sources(self):
         """
@@ -101,9 +100,7 @@ class JDKFinder(object):
                 cpp_files.extend(os.path.join(root, filename)
                                  for filename in filenames
                                  if os.path.splitext(filename)[1] == '.cpp')
-
         return cpp_files
-
 
     def find_jdk_home(self):
         """
@@ -116,9 +113,8 @@ class JDKFinder(object):
         java_home = os.getenv("JAVA_HOME")
         if self.check_jdk(java_home):
             return java_home
-
-        raise NoJDKError(os.getenv("JAVA_HOME"))
-
+        else:
+            raise NoJDKError(os.getenv("JAVA_HOME"))
 
     def check_homes(self, homes):
         """
@@ -132,9 +128,6 @@ class JDKFinder(object):
             if java_home is not None:
                 # Valid path
                 return java_home
-
-        return None
-
 
     def check_jdk(self, java_home):
         """
@@ -168,6 +161,7 @@ class JDKFinder(object):
 
 # ------------------------------------------------------------------------------
 
+
 class WindowsJDKFinder(JDKFinder):
     """
     Windows specific JDK Finder
@@ -194,7 +188,6 @@ class WindowsJDKFinder(JDKFinder):
             os.path.join(java_home, 'include', 'win32')
         ]
 
-
     def find_jdk_home(self):
         """
         Tries to locate a JDK home folder, according to the JAVA_HOME
@@ -208,7 +201,6 @@ class WindowsJDKFinder(JDKFinder):
             java_home = JDKFinder.find_jdk_home(self)
             # Found it
             return java_home
-
         except NoJDKError as ex:
             visited_folders.extend(ex.possible_homes)
 
@@ -219,13 +211,12 @@ class WindowsJDKFinder(JDKFinder):
 
         # Try with known locations
         # 64 bits (or 32 bits on 32 bits OS) JDK
-        possible_homes = glob(os.path.join(os.environ['ProgramFiles'],
-                                           "Java", "*"))
-
+        possible_homes = glob(
+            os.path.join(os.environ['ProgramFiles'], "Java", "*"))
         try:
             # 32 bits (or none on 32 bits OS) JDK
-            possible_homes += glob(os.path.join(os.environ['ProgramFiles(x86)'],
-                                                "Java", "*"))
+            possible_homes += glob(
+                os.path.join(os.environ['ProgramFiles(x86)'], "Java", "*"))
         except KeyError:
             # Environment variable doesn't exist on Windows 32 bits
             pass
@@ -234,11 +225,9 @@ class WindowsJDKFinder(JDKFinder):
         java_home = self.check_homes(possible_homes)
         if java_home:
             return java_home
-
         else:
             visited_folders.extend(possible_homes)
             raise NoJDKError(visited_folders)
-
 
     def _get_from_registry(self):
         """
@@ -249,23 +238,21 @@ class WindowsJDKFinder(JDKFinder):
         """
         import winreg
         try:
-            jreKey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                                r"SOFTWARE\JavaSoft\Java Runtime Environment")
-            cv = winreg.QueryValueEx(jreKey, "CurrentVersion")
-            versionKey = winreg.OpenKey(jreKey, cv[0])
-            winreg.CloseKey(jreKey)
+            jre_hkey = winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE,
+                r"SOFTWARE\JavaSoft\Java Runtime Environment")
+            cv = winreg.QueryValueEx(jre_hkey, "CurrentVersion")
+            version_hkey = winreg.OpenKey(jre_hkey, cv[0])
+            winreg.CloseKey(jre_hkey)
 
-            cv = winreg.QueryValueEx(versionKey, "RuntimeLib")
-            winreg.CloseKey(versionKey)
-
+            cv = winreg.QueryValueEx(version_hkey, "RuntimeLib")
+            winreg.CloseKey(version_hkey)
             return cv[0]
-
         except WindowsError:
             pass
 
-        return None
-
 # ------------------------------------------------------------------------------
+
 
 class DarwinJDKFinder(JDKFinder):
     """
@@ -292,7 +279,6 @@ class DarwinJDKFinder(JDKFinder):
             os.path.join(java_home, 'include', 'darwin'),
         ]
 
-
     def find_jdk_home(self):
         """
         Tries to locate a JDK home folder, according to the JAVA_HOME
@@ -306,30 +292,27 @@ class DarwinJDKFinder(JDKFinder):
             java_home = JDKFinder.find_jdk_home(self)
             # Found it
             return java_home
-
         except NoJDKError as ex:
             visited_folders.extend(ex.possible_homes)
 
         # Changes according to:
-        # http://stackoverflow.com/questions/8525193/cannot-install-jpype-on-os-x-lion-to-use-with-neo4j
+        # http://stackoverflow.com/questions/8525193
+        # /cannot-install-jpype-on-os-x-lion-to-use-with-neo4j
         # and
         # http://blog.y3xz.com/post/5037243230/installing-jpype-on-mac-os-x
         osx = platform.mac_ver()[0][:4]
 
         # Seems like the installation folder for Java 7
         possible_homes = glob("/Library/Java/JavaVirtualMachines/*")
-
         if osx in ('10.7', '10.8'):
             # ... for Java 6
-            possible_homes.append('/System/Library/Frameworks/' \
+            possible_homes.append('/System/Library/Frameworks/'
                                   'JavaVM.framework/Versions/Current/')
-
         elif osx == '10.6':
             # Previous Mac OS version
-            possible_homes.append('/Developer/SDKs/MacOSX10.6.sdk/System/' \
-                                  'Library/Frameworks/JavaVM.framework/' \
+            possible_homes.append('/Developer/SDKs/MacOSX10.6.sdk/System/'
+                                  'Library/Frameworks/JavaVM.framework/'
                                   'Versions/1.6.0/')
-
         else:
             # Other previous version
             possible_homes.append('/Library/Java/Home')
@@ -338,12 +321,10 @@ class DarwinJDKFinder(JDKFinder):
         java_home = self.check_homes(possible_homes)
         if java_home:
             return java_home
-
         else:
             # No JDK found
             visited_folders.extend(possible_homes)
             raise NoJDKError(visited_folders)
-
 
     def check_jdk(self, java_home):
         """
@@ -377,8 +358,8 @@ class DarwinJDKFinder(JDKFinder):
             # Match
             return java_home
 
-
 # ------------------------------------------------------------------------------
+
 
 class LinuxJDKFinder(JDKFinder):
     """
@@ -404,7 +385,6 @@ class LinuxJDKFinder(JDKFinder):
             os.path.join(java_home, 'include', 'linux'),
         ]
 
-
     def find_jdk_home(self):
         """
         Tries to locate a JDK home folder, according to the JAVA_HOME
@@ -418,7 +398,6 @@ class LinuxJDKFinder(JDKFinder):
             java_home = JDKFinder.find_jdk_home(self)
             # Found it
             return java_home
-
         except NoJDKError as ex:
             visited_folders.extend(ex.possible_homes)
 
@@ -432,7 +411,6 @@ class LinuxJDKFinder(JDKFinder):
         java_home = self.check_homes(possible_homes)
         if java_home:
             return java_home
-
         else:
             visited_folders.extend(possible_homes)
             raise NoJDKError(visited_folders)
@@ -479,36 +457,41 @@ try:
     else:
         # Linux / POSIX
         config = LinuxJDKFinder()
-except NoJDKError as ex:
+
+except NoJDKError as no_jdk_ex:
     raise RuntimeError(
-                "No Java/JDK could be found. I looked in the following "
-                "directories:\n\n{0}\n\n"
-                "Please check that you have it installed.\n\n"
-                "If you have and the destination is not in the "
-                "above list, please find out where your java's home is, "
-                "set your JAVA_HOME environment variable to that path and "
-                "retry the installation.\n"
-                "If this still fails please open a ticket or create a "
-                "pull request with a fix on github:\n"
-                "https://github.com/tcalmant/jpype/"
-                .format('\n'.join(ex.possible_homes)))
+        "No Java/JDK could be found. I looked in the following "
+        "directories:\n\n{0}\n\n"
+        "Please check that you have it installed.\n\n"
+        "If you have and the destination is not in the "
+        "above list, please find out where your java's home is, "
+        "set your JAVA_HOME environment variable to that path and "
+        "retry the installation.\n"
+        "If this still fails please open a ticket or create a "
+        "pull request with a fix on github:\n"
+        "https://github.com/tcalmant/jpype/"
+        .format('\n'.join(no_jdk_ex.possible_homes)))
 
 # ------------------------------------------------------------------------------
+
 
 class CustomBuildExt(build_ext):
     """
     Custom build process to handle different compilers
     """
+    # Compiler-specific extra arguments
     compile_args = {
         'msvc': ['/EHsc'],
         'gcc': [],
         'mingw32': []
     }
 
+    # Linker-specific extra arguments
     linker_args = {
         'mingw32': []
     }
 
+    # Arguments set by Python but which generate warnings
     ignored_arguments = (
         '-Wstrict-prototypes',
         '-Wimplicit-function-declaration'
@@ -518,10 +501,16 @@ class CustomBuildExt(build_ext):
         """
         Sets up the compiler arguments
         """
-        self.compiler.compiler = [arg for arg in self.compiler.compiler
-                                  if arg not in self.ignored_arguments]
-        self.compiler.compiler_so = [arg for arg in self.compiler.compiler_so
-                                     if arg not in self.ignored_arguments]
+        try:
+            # Filter compiler arguments
+            self.compiler.compiler = [arg for arg in self.compiler.compiler
+                                      if arg not in self.ignored_arguments]
+            self.compiler.compiler_so = [arg
+                                         for arg in self.compiler.compiler_so
+                                         if arg not in self.ignored_arguments]
+        except AttributeError:
+            # Incompatible compiler
+            pass
 
         compiler = self.compiler.compiler_type
         if compiler in self.compile_args:
@@ -531,10 +520,11 @@ class CustomBuildExt(build_ext):
         if compiler in self.linker_args:
             for ext in self.extensions:
                 ext.extra_link_args = self.linker_args[compiler]
-        
+
         build_ext.build_extensions(self)
 
 # ------------------------------------------------------------------------------
+
 
 # Define the Python extension
 jpypeLib = Extension(name="_jpype", **config.configuration)
