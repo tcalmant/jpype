@@ -75,7 +75,6 @@ class CygwinJVMFinder(_jvmfinder.JVMFinder):
     def get_boot_arguments(self, jvm_lib_path):
         """
         Prepares the arguments required to start a JVM in Cygwin.
-
         :param jvm_lib_path: Path to the jvm.dll file, Cygwin style
         :return: The list of arguments to add for the JVM to start
         :raise OSError: Can't find required files
@@ -119,3 +118,35 @@ class CygwinJVMFinder(_jvmfinder.JVMFinder):
         # Return the result as JVM properties
         return ['-Dsun.boot.library.path={0}'.format(library_path),
                 '-Xbootclasspath:{0}'.format(boot_classpath)]
+
+    def _convert_paths(self, classpath):
+        """
+        Converts Cygwin classpath folders to Windows ones
+
+        :param classpath: The classpath given to the JVM
+        :return: A Windows-form classpath
+        """
+        try:
+            paths_part = classpath.split("=", 2)[1]
+        except IndexError:
+            return classpath
+
+        paths = [cygwin_to_windows(path)
+                 for path in paths_part.split(os.pathsep)]
+        return "-Djava.class.path={0}".format(";".join(paths))
+
+    def normalize_arguments(self, jvm_lib_path, args):
+        """
+        Prepares the arguments required to start a JVM in Cygwin.
+
+        :param jvm_lib_path: Path to the jvm.dll file, Cygwin style
+        :param args: The list of arguments given to the JVM
+        :return: The list of arguments to add for the JVM to start
+        :raise OSError: Can't find required files
+        """
+        for idx, arg in enumerate(args):
+            if arg.startswith("-Djava.class.path"):
+                args[idx] = self._convert_paths(arg)
+                break
+
+        return self.get_boot_arguments(jvm_lib_path) + args

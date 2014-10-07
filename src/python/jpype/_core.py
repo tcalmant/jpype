@@ -50,10 +50,10 @@ def startJVM(jvm, *args) :
     """
     # Insert OS specific arguments first
     finder = get_jvm_finder()
-    args = tuple(finder.get_boot_arguments(jvm) + list(args))
+    args = finder.normalize_arguments(jvm, list(args))
 
     # Start the JVM
-    _jpype.startup(jvm, args, True)
+    _jpype.startup(jvm, tuple(args), True)
 
     # Initialize jPype
     _jclass._initialize()
