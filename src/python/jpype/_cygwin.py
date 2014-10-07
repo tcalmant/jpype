@@ -75,10 +75,13 @@ class CygwinJVMFinder(_jvmfinder.JVMFinder):
         :return: The list of arguments to add for the JVM to start
         :raise OSError: Can't find required files
         """
+        break_on_next = False
         parts = jvm_lib_path.lower().split(os.sep)
         for idx, part in enumerate(reversed(parts)):
-            if 'jre' in part or 'jdk' in part:
+            if break_on_next:
                 break
+            elif 'bin' in part or 'lib' in part:
+                break_on_next = True
         else:
             raise OSError("Can't find the root jre nor jdk folder.")
 
