@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-
-#*****************************************************************************
+# ****************************************************************************
 #   Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +14,20 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# ****************************************************************************
+
 import jpype
 
 jvm_lib = jpype.getDefaultJVMPath()
 print("JVM Library path:", jvm_lib)
 
 jpype.startJVM(jvm_lib)
-jpype.java.lang.System.out.println("Hello World, from Java !")
+props = jpype.java.lang.System.getProperties()
+try:
+    for key in props.keySet():
+        if key.startswith("java") or key.startswith("sun"):
+            print(key, "->", props.getProperty(key))
+except:
+    pass
+
 jpype.shutdownJVM()
