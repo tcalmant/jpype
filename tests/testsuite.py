@@ -21,21 +21,21 @@
 import unittest
 import os.path
 
-from jpypetest import numeric, attr, array, objectwrapper, proxy, exc, \
-    serial, mro
+from jpypetest import test_numeric, test_attr, test_array, test_objectwrapper,\
+    test_proxy, test_exc, test_serial, test_mro
 import jpype
 
 
 def suite():
     return unittest.TestSuite((
-        numeric.suite(),
-        attr.suite(),
-        array.suite(),
-        objectwrapper.suite(),
-        proxy.suite(),
-        exc.suite(),
-        serial.suite(),
-        mro.suite(),
+        test_numeric.suite(),
+        test_attr.suite(),
+        test_array.suite(),
+        test_objectwrapper.suite(),
+        test_proxy.suite(),
+        test_exc.suite(),
+        test_serial.suite(),
+        test_mro.suite(),
     ))
 
 
@@ -45,7 +45,7 @@ def runTest():
     print("Running testsuite using JVM: {0}".format(jpype.getDefaultJVMPath()))
     jpype.startJVM(jpype.getDefaultJVMPath(),
                    "-ea", "-Xmx256M", "-Xms64M",
-                   "-Djava.class.path={0}" \
+                   "-Djava.class.path={0}"
                    .format(os.path.join(root, "classes")))
 
     runner = unittest.TextTestRunner()
