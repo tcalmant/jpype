@@ -1,8 +1,9 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+#!/usr/bin/python3
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
 #       http://www.apache.org/licenses/LICENSE-2.0
@@ -13,16 +14,20 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
-from jpype import java, JClass
+# *****************************************************************************
+
 import unittest
+
+from jpype import java, JClass
 from . import common
 
-def suite() :
+
+def suite():
     return unittest.makeSuite(SerializationTestCase)
 
-class SerializationTestCase(common.JPypeTestCase) :
-    def testSerialize(self) :
+
+class SerializationTestCase(common.JPypeTestCase):
+    def testSerialize(self):
         o = JClass("jpype.serial.SerializationTest")()
         fos = java.io.FileOutputStream("testSerial.dat")
         oos = java.io.ObjectOutputStream(fos)
@@ -32,7 +37,8 @@ class SerializationTestCase(common.JPypeTestCase) :
         fos.close()
 
 
-# The following cannto work because JPype has no way to simulate the "caller's ClassLoader"
+# The following cannto work because JPype has no way to simulate the
+# "caller's ClassLoader"
 #    def testDeSerialize(self) :
 #
 #        fis = java.io.FileInputStream("testSerial.dat")

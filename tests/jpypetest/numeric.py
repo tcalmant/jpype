@@ -1,8 +1,9 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+#!/usr/bin/python3
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
 #       http://www.apache.org/licenses/LICENSE-2.0
@@ -13,31 +14,36 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
+
+import unittest
+import sys
+
 from jpype import JPackage, java, JFloat
-import unittest, sys
 from . import common
 
-def suite() :
+
+def suite():
     return unittest.makeSuite(NumericTestCase)
 
-class NumericTestCase(common.JPypeTestCase) :
-    def testMathAbs(self) :
+
+class NumericTestCase(common.JPypeTestCase):
+    def testMathAbs(self):
         assert java.lang.Math.abs(-10) == 10
 
-    def testDoubleConversion(self) :
+    def testDoubleConversion(self):
         f = java.lang.Float.MAX_VALUE * 2
         jpype = JPackage("jpype")
         assert jpype.numeric.NumericTest.doubleIsTwiceMaxFloat(f)
 
-    def testDoubleIsProperlyConverted(self) :
-        if sys.platform.find("linux") != -1 :
+    def testDoubleIsProperlyConverted(self):
+        if sys.platform.find("linux") != -1:
             # double comparison on linux is broken ... Nan == 0.0!!!
-            print("{0} != {1} -> {2} == -> {3}"\
+            print("{0} != {1} -> {2} == -> {3}"
                   .format(java.lang.Double.NaN, 0.0,
                           bool(java.lang.Double.NaN != 0.0),
                           bool(java.lang.Double.NaN == 0.0)))
-        else :
+        else:
             assert java.lang.Double.NEGATIVE_INFINITY != 0.0
             assert java.lang.Double.MAX_VALUE != 0.0
             assert java.lang.Double.NaN != 0.0

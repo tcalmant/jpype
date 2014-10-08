@@ -1,8 +1,9 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+#!/usr/bin/python3
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
-#   Licensed under the Apache License, Version 2.0 (the "License");
-#   you may not use this file except in compliance with the License.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
 #
 #       http://www.apache.org/licenses/LICENSE-2.0
@@ -13,38 +14,45 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
-from jpype import JPackage, JProxy
+# *****************************************************************************
+
 import unittest
+
+from jpype import JPackage, JProxy
 from . import common
 
-def suite() :
+
+def suite():
     return unittest.makeSuite(ProxyTestCase)
 
-def _testMethod() :
+
+def _testMethod():
     return 32
 
-def _testMethod2() :
+
+def _testMethod2():
     return "Fooo!"
 
-class C :
-    def testMethod(self) :
+
+class C:
+    def testMethod(self):
         return 42
 
-    def testMethod2(self) :
+    def testMethod2(self):
         return "Bar"
 
-    def write(self, data, start, length) :
+    def write(self, data, start, length):
         print('aaaaa')
         print((data.__class__, data[0]))
         print(start)
         print(length)
 
-class ProxyTestCase(common.JPypeTestCase) :
-    def testProxyWithDict(self) :
+
+class ProxyTestCase(common.JPypeTestCase):
+    def testProxyWithDict(self):
         d = {
-            'testMethod' : _testMethod,
-            'testMethod2' : _testMethod2,
+            'testMethod': _testMethod,
+            'testMethod2': _testMethod2,
         }
         itf2 = JPackage("jpype.proxy").ITestInterface3
         Test3 = JPackage("jpype.proxy").Test3
@@ -52,7 +60,7 @@ class ProxyTestCase(common.JPypeTestCase) :
 
         Test3.testProxy(proxy)
 
-    def testProxyWithInst(self) :
+    def testProxyWithInst(self):
         itf2 = JPackage("jpype.proxy").ITestInterface3
         Test3 = JPackage("jpype.proxy").Test3
 
@@ -60,7 +68,7 @@ class ProxyTestCase(common.JPypeTestCase) :
         proxy = JProxy(itf2, inst=c)
         Test3.testProxy(proxy)
 
-    def testProxyWithThread(self) :
+    def testProxyWithThread(self):
         itf2 = JPackage("jpype.proxy").ITestInterface3
         Test3 = JPackage("jpype.proxy").Test3
 
@@ -70,7 +78,7 @@ class ProxyTestCase(common.JPypeTestCase) :
         t3 = Test3()
         t3.testProxyWithThread(proxy)
 
-    def testProxyWithArguments(self) :
+    def testProxyWithArguments(self):
         itf2 = JPackage("jpype.proxy").ITestInterface2
         Test3 = JPackage("jpype.proxy").Test3
 
@@ -78,7 +86,7 @@ class ProxyTestCase(common.JPypeTestCase) :
         proxy = JProxy(itf2, inst=c)
         Test3().testCallbackWithParameters(proxy)
 
-    def testProxyWithMultipleInterface(self) :
+    def testProxyWithMultipleInterface(self):
         itf2 = JPackage("jpype.proxy").ITestInterface2
         itf3 = JPackage("jpype.proxy").ITestInterface3
         Test3 = JPackage("jpype.proxy").Test3

@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
-
-#*****************************************************************************
+#!/usr/bin/python3
+# *****************************************************************************
 #   Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,20 +14,21 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
 
 import os
 import time
 from xml.dom import minidom
 
-def output(el, prefix="") :
-    if el.nodeType != el.ELEMENT_NODE :
+
+def output(el, prefix=""):
+    if el.nodeType != el.ELEMENT_NODE:
         return
 
     # print("{0}<{1}".format(prefix, el.tagName), end='')
 
     atts = el.attributes
-    for i in range(atts.length) :
+    for i in range(atts.length):
         _ = atts.item(i)
         # a = atts.item(i)
         # print(' {0}="{1}"'.format(a.nodeName, a.nodeValue), end='')
@@ -36,10 +36,10 @@ def output(el, prefix="") :
     # print('>')
 
     nl = el.childNodes
-    for i in range(nl.length) :
+    for i in range(nl.length):
         output(nl.item(i), prefix + "  ")
 
-    # print("{0}</{1}>".format(prefix, el.tagName))
+        # print("{0}</{1}>".format(prefix, el.tagName))
 
 
 # Compute the XML file path
@@ -55,4 +55,3 @@ for i in range(count):
 
 t2 = time.time()
 print(count, "iterations in", t2 - t1, "seconds")
-

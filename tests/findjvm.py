@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
-
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+#!/usr/bin/python3
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,8 +14,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
-import jpype, os.path
+# *****************************************************************************
+
+import os.path
+
+import jpype
 
 jvmlib = jpype.getDefaultJVMPath()
 print(os.path.dirname(os.path.dirname(jvmlib)))

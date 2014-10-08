@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
-
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+#!/usr/bin/python3
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,25 +14,28 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
 
 import os
 import time
+
 from jpype import javax, JPackage, startJVM, getDefaultJVMPath, shutdownJVM
+
 
 startJVM(getDefaultJVMPath(), "-ea")
 
 # XML test
 Element = JPackage("org").w3c.dom.Element
 
-def output(el, prefix="") :
-    if not Element.__isinstance__(el) :
+
+def output(el, prefix=""):
+    if not Element.__isinstance__(el):
         return
 
     # print("{0}<{1}".format(prefix, el.getTagName()), end='')
 
     atts = el.getAttributes()
-    for i in range(atts.getLength()) :
+    for i in range(atts.getLength()):
         _ = atts.item(i)
         # a = atts.item(i)
         # print(' {0}="{1}"'.format(a.getNodeName(), a.getNodeValue()), end='')
@@ -41,10 +43,10 @@ def output(el, prefix="") :
     # print('>')
 
     nl = el.getChildNodes()
-    for i in range(nl.getLength()) :
+    for i in range(nl.getLength()):
         output(nl.item(i), prefix + "  ")
 
-    # print("{0}</{1}>".format(prefix, el.getTagName()))
+        # print("{0}</{1}>".format(prefix, el.getTagName()))
 
 
 # Compute the XML file path
@@ -52,8 +54,9 @@ xml_file = os.path.join(os.path.dirname(__file__), "sample", "big.xml")
 
 t1 = time.time()
 count = 30
-for i in range(count) :
-    build = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder()
+for i in range(count):
+    build = javax.xml.parsers.DocumentBuilderFactory.newInstance() \
+        .newDocumentBuilder()
     doc = build.parse(xml_file)
 
     el = doc.getDocumentElement()

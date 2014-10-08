@@ -1,7 +1,6 @@
-#!/usr/bin/env python3
-
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+#!/usr/bin/python3
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -15,12 +14,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
+
 import time
+import os.path
+
 from jpype import javax, JProxy, JPackage, startJVM, getDefaultJVMPath, \
     shutdownJVM
 
-import os.path
+
 root = os.path.abspath(os.path.dirname(__file__))
 classes = os.path.join(root, "classes")
 startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path={0}".format(classes))
@@ -28,38 +30,39 @@ startJVM(getDefaultJVMPath(), "-ea", "-Djava.class.path={0}".format(classes))
 # XML test
 Element = JPackage("org").w3c.dom.Element
 
-class ContentHandler(object) :
-    def characters(self, ch, start, length) :
+
+class ContentHandler(object):
+    def characters(self, ch, start, length):
         pass
 
-    def endDocument(self) :
+    def endDocument(self):
         pass
 
-    def endElement(self, namespaceURI, localName, qName) :
+    def endElement(self, namespaceURI, localName, qName):
         pass
 
-    def endPrefixMapping(self, prefix) :
+    def endPrefixMapping(self, prefix):
         pass
 
-    def ignorableWhitespace(self, ch, start, length) :
+    def ignorableWhitespace(self, ch, start, length):
         pass
 
-    def processingInstruction(self, target, data) :
+    def processingInstruction(self, target, data):
         pass
 
-    def setDocumentLocator(self, locator) :
+    def setDocumentLocator(self, locator):
         pass
 
-    def skippedEntity(self, name) :
+    def skippedEntity(self, name):
         pass
 
-    def startDocument(self,) :
+    def startDocument(self, ):
         pass
 
-    def startElement(self, namespaceURI, localName, qName, atts) :
+    def startElement(self, namespaceURI, localName, qName, atts):
         pass
 
-    def startPrefixMapping(self, prefix, uri) :
+    def startPrefixMapping(self, prefix, uri):
         pass
 
 # Compute the XML file path
@@ -67,12 +70,11 @@ xml_file = os.path.join(root, "sample", "big.xml")
 
 t1 = time.time()
 count = 30
-for i in range(count) :
+for i in range(count):
     DelegateHandler = JPackage("jpype.xml").DelegateHandler
-    dh = DelegateHandler(None, None,
-                         JProxy("org.xml.sax.ContentHandler",
-                                inst=ContentHandler()),
-                         None)
+    dh = DelegateHandler(
+        None, None, JProxy("org.xml.sax.ContentHandler",
+                           inst=ContentHandler()), None)
 
     build = javax.xml.parsers.SAXParserFactory.newInstance().newSAXParser()
     build.parse(xml_file, dh)
