@@ -1,0 +1,11 @@
+[run]
+source =
+    jpype/
+    jpypex/
+
+[report]
+include =
+    jpype/*
+    jpypex/*
+exclude = *
+

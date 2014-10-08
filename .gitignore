@@ -12,6 +12,10 @@ testSerial.dat
 build/
 dist/
 
+# Coverage
+.coverage
+htmlcov/
+
 # IDE build directory
 .idea/
 .settings/
