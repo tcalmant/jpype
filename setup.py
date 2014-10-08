@@ -79,8 +79,8 @@ class JDKFinder(object):
         """
         self.configuration = {
             'include_dirs': [
-                os.path.join('src', 'native', 'common', 'include'),
-                os.path.join('src', 'native', 'python', 'include'),
+                os.path.join('native', 'common', 'include'),
+                os.path.join('native', 'python', 'include'),
             ],
             'sources': self.find_sources()
         }
@@ -90,8 +90,8 @@ class JDKFinder(object):
         Sets up the list of files to be compiled
         """
         # Source folders
-        common_dir = os.path.join("src", "native", "common")
-        python_dir = os.path.join("src", "native", "python")
+        common_dir = os.path.join("native", "common")
+        python_dir = os.path.join("native", "python")
 
         # List all .cpp files in those folders
         cpp_files = []
@@ -438,7 +438,7 @@ class CygwinFinder(JDKFinder):
         self.configuration['library_dirs'] = [os.path.join(java_home, 'lib')]
         self.configuration['include_dirs'] += [
             os.path.join(java_home, 'include'),
-            os.path.join('src', 'native', 'cygwin'),
+            os.path.join('native', 'cygwin'),
             os.path.join(java_home, 'include', 'win32')
         ]
 
@@ -460,15 +460,14 @@ try:
 
 except NoJDKError as no_jdk_ex:
     raise RuntimeError(
-        "No Java/JDK could be found. I looked in the following "
-        "directories:\n\n{0}\n\n"
+        "No Java/JDK could be found. I looked in the following directories:"
+        "\n\n{0}\n\n"
         "Please check that you have it installed.\n\n"
-        "If you have and the destination is not in the "
-        "above list, please find out where your java's home is, "
-        "set your JAVA_HOME environment variable to that path and "
-        "retry the installation.\n"
-        "If this still fails please open a ticket or create a "
-        "pull request with a fix on github:\n"
+        "If you have and the destination is not in the above list, please "
+        "find out where your java's home is, set your JAVA_HOME environment "
+        "variable to that path and retry the installation.\n"
+        "If this still fails please open a ticket or create a pull request "
+        "with a fix on github:\n"
         "https://github.com/tcalmant/jpype/"
         .format('\n'.join(no_jdk_ex.possible_homes)))
 
@@ -559,10 +558,6 @@ setup(
     packages=[
         "jpype", 'jpype.awt', 'jpype.awt.event',
         'jpypex', 'jpypex.swing'],
-    package_dir={
-        "jpype": os.path.join("src", "python", "jpype"),
-        'jpypex': os.path.join("src", "python", "jpypex"),
-    },
     cmdclass={'build_ext': CustomBuildExt},
     ext_modules=[jpypeLib],
 )
