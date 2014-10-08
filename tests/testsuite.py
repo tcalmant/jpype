@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -17,41 +16,46 @@
 #
 #*****************************************************************************
 
-import unittest
-from jpypetest import numeric, attr, array, objectwrapper, proxy, exc, \
-	serial, mro
+# WARNING: This test suite must be ran from inside the "tests" folder
 
-import jpype
+import unittest
 import os.path
 
-def suite() :
-	return unittest.TestSuite((
-		numeric.suite(),
-		attr.suite(),
-		array.suite(),
-		objectwrapper.suite(),
-		proxy.suite(),
-		exc.suite(),
-		serial.suite(),
-		mro.suite(),
-	))
+from jpypetest import numeric, attr, array, objectwrapper, proxy, exc, \
+    serial, mro
+import jpype
 
-def runTest() :
-	root = os.path.abspath(os.path.dirname(__file__))
 
-	print(("Running testsuite using JVM: {0}".format(jpype.getDefaultJVMPath())))
-	jpype.startJVM(jpype.getDefaultJVMPath(),
-				   "-ea", "-Xmx256M", "-Xms64M",
-				   "-Djava.class.path={0}" \
-				   .format(os.path.join(root, "classes")))
+def suite():
+    return unittest.TestSuite((
+        numeric.suite(),
+        attr.suite(),
+        array.suite(),
+        objectwrapper.suite(),
+        proxy.suite(),
+        exc.suite(),
+        serial.suite(),
+        mro.suite(),
+    ))
 
-	runner = unittest.TextTestRunner()
-	runner.run(suite())
 
-	s = slice(2, 4)
-	print("{0} {1}".format(s, dir(s)))
+def runTest():
+    root = os.path.abspath(os.path.dirname(__file__))
 
-	jpype.shutdownJVM()
+    print("Running testsuite using JVM: {0}".format(jpype.getDefaultJVMPath()))
+    jpype.startJVM(jpype.getDefaultJVMPath(),
+                   "-ea", "-Xmx256M", "-Xms64M",
+                   "-Djava.class.path={0}" \
+                   .format(os.path.join(root, "classes")))
 
-if __name__ == '__main__' :
-	runTest()
+    runner = unittest.TextTestRunner()
+    runner.run(suite())
+
+    s = slice(2, 4)
+    print("{0} {1}".format(s, dir(s)))
+
+    jpype.shutdownJVM()
+
+
+if __name__ == '__main__':
+    runTest()
