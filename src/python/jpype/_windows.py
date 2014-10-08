@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
+
+import os
 
 from . import _jvmfinder
-import os
 import winreg
 
-# ------------------------------------------------------------------------------
 
 class WindowsJVMFinder(_jvmfinder.JVMFinder):
     """
@@ -37,13 +37,14 @@ class WindowsJVMFinder(_jvmfinder.JVMFinder):
 
         # Predefined locations
         self._locations = set()
-        for key in (# 64 bits (or 32 bits on 32 bits OS) JDK
-                    'ProgramFiles'
-                    # 32 bits JDK on 32 bits OS
-                    'ProgramFiles(x86)'):
+        for key in (
+                # 64 bits (or 32 bits on 32 bits OS) JDK
+                'ProgramFiles'
+                # 32 bits JDK on 32 bits OS
+                'ProgramFiles(x86)'):
             try:
                 env_folder = os.environ[key]
-                self._locations.add(os.path.join(env_folder, "Java"),)
+                self._locations.add(os.path.join(env_folder, "Java"), )
 
             except KeyError:
                 # Environment variable is missing (ignore)
@@ -54,7 +55,6 @@ class WindowsJVMFinder(_jvmfinder.JVMFinder):
                          self._get_from_registry,
                          self._get_from_known_locations)
 
-
     def _get_from_registry(self):
         """
         Retrieves the path to the default Java installation stored in the
@@ -62,18 +62,17 @@ class WindowsJVMFinder(_jvmfinder.JVMFinder):
 
         :return: The path found in the registry, or None
         """
-        try :
-            jreKey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
-                                r"SOFTWARE\JavaSoft\Java Runtime Environment")
+        try:
+            jreKey = winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE,
+                r"SOFTWARE\JavaSoft\Java Runtime Environment")
             cv = winreg.QueryValueEx(jreKey, "CurrentVersion")
             versionKey = winreg.OpenKey(jreKey, cv[0])
             winreg.CloseKey(jreKey)
 
             cv = winreg.QueryValueEx(versionKey, "RuntimeLib")
             winreg.CloseKey(versionKey)
-
             return cv[0]
-
         except WindowsError:
             pass
 

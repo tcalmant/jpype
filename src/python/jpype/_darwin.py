@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
 
 # Reuse the Linux code
 from ._linux import LinuxJVMFinder
 
-# ------------------------------------------------------------------------------
 
 class DarwinJVMFinder(LinuxJVMFinder):
     """
@@ -39,7 +38,6 @@ class DarwinJVMFinder(LinuxJVMFinder):
 
         # Predefined locations
         self._locations = ('/Library/Java/JavaVirtualMachines',)
-
 
     def _pre_vm7_path(self):
         """

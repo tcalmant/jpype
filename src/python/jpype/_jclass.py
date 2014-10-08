@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,8 +13,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
+
 import _jpype
+
 from ._pykeywords import KEYWORDS
 
 
@@ -30,8 +32,8 @@ _RUNTIMEEXCEPTION = None
 _CUSTOMIZERS = []
 
 _COMPARABLE_METHODS = {
-        "__cmp__": lambda self, o: self.compareTo(o)
-        }
+    "__cmp__": lambda self, o: self.compareTo(o)
+}
 
 
 def _initialize():
@@ -78,10 +80,12 @@ def _javaExceptionNew(self, *args):
 def _javaInit(self, *args):
     object.__init__(self)
 
-    if len(args) == 1 and isinstance(args[0], tuple) and args[0][0] is _SPECIAL_CONSTRUCTOR_KEY:
+    if len(args) == 1 and isinstance(args[0], tuple) \
+            and args[0][0] is _SPECIAL_CONSTRUCTOR_KEY:
         self.__javaobject__ = args[0][1]
     else:
-        self.__javaobject__ = self.__class__.__javaclass__.newClassInstance(*args)
+        self.__javaobject__ = self.__class__.__javaclass__.newClassInstance(
+            *args)
 
 
 def _javaGetAttr(self, name):
@@ -105,14 +109,14 @@ class _JavaClass(type):
 
         static_fields = {}
         members = {
-                "__javaclass__": jc,
-                "__init__": _javaInit,
-                "__str__": lambda self: self.toString(),
-                "__hash__": lambda self: self.hashCode(),
-                "__eq__": lambda self, o: self.equals(o),
-                "__ne__": lambda self, o: not self.equals(o),
-                "__getattribute__": _javaGetAttr,
-                }
+            "__javaclass__": jc,
+            "__init__": _javaInit,
+            "__str__": lambda self: self.toString(),
+            "__hash__": lambda self: self.hashCode(),
+            "__eq__": lambda self, o: self.equals(o),
+            "__ne__": lambda self, o: not self.equals(o),
+            "__getattribute__": _javaGetAttr,
+        }
 
         if name == 'java.lang.Object' or jc.isPrimitive():
             bases.append(object)
@@ -136,19 +140,21 @@ class _JavaClass(type):
         for i in fields:
             fname = i.getName()
             if fname in KEYWORDS:
-                fname = fname + "_"
+                fname += "_"
 
             if i.isStatic():
-                g = lambda self, fld = i: fld.getStaticAttribute()
+                g = lambda self, fld=i: fld.getStaticAttribute()
                 s = None
                 if not i.isFinal():
-                    s = lambda self, v, fld = i: fld.setStaticAttribute(v)
+                    s = lambda self, v, fld=i: fld.setStaticAttribute(v)
                 static_fields[fname] = property(g, s)
             else:
-                g = lambda self, fld = i: fld.getInstanceAttribute(self.__javaobject__)
+                g = lambda self, fld=i: fld.getInstanceAttribute(
+                    self.__javaobject__)
                 s = None
                 if not i.isFinal():
-                    s = lambda self, v, fld = i: fld.setInstanceAttribute(self.__javaobject__, v)
+                    s = lambda self, v, fld=i: fld.setInstanceAttribute(
+                        self.__javaobject__, v)
                 members[fname] = property(g, s)
 
         # methods
@@ -156,7 +162,7 @@ class _JavaClass(type):
         for jm in methods:
             mname = jm.getName()
             if mname in KEYWORDS:
-                mname = mname + "_"
+                mname += "_"
 
             members[mname] = jm
 

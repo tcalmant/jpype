@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,7 +13,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
+
 import sys
 
 import _jpype
@@ -32,16 +33,17 @@ from . import _refdaemon
 
 _usePythonThreadForDaemon = False
 
+
 def setUsePythonThreadForDeamon(v):
     global _usePythonThreadForDaemon
     _usePythonThreadForDaemon = v
 
 
-def isJVMStarted() :
+def isJVMStarted():
     return _jpype.isStarted()
 
 
-def startJVM(jvm, *args) :
+def startJVM(jvm, *args):
     """
     Starts a Java Virtual Machine
 
@@ -68,12 +70,13 @@ def startJVM(jvm, *args) :
     reflect._initialize()
 
     # start the reference daemon thread
-    if _usePythonThreadForDaemon :
+    if _usePythonThreadForDaemon:
         _refdaemon.startPython()
     else:
         _refdaemon.startJava()
 
-def attachToJVM(jvm) :
+
+def attachToJVM(jvm):
     _jpype.attach(jvm)
 
     _jclass._initialize()
@@ -85,17 +88,21 @@ def attachToJVM(jvm) :
     _jobject._initialize()
     _properties._initialize()
 
-def shutdownJVM() :
+
+def shutdownJVM():
     _refdaemon.stop()
     _jpype.shutdown()
 
-def isThreadAttachedToJVM() :
+
+def isThreadAttachedToJVM():
     return _jpype.isThreadAttachedToJVM()
 
-def attachThreadToJVM() :
+
+def attachThreadToJVM():
     _jpype.attachThreadToJVM()
 
-def detachThreadFromJVM() :
+
+def detachThreadFromJVM():
     _jpype.detachThreadFromJVM()
 
 
@@ -144,7 +151,7 @@ class ConversionConfigClass(object):
         return self._convertString
 
     def _setConvertString(self, value):
-        if value :
+        if value:
             self._convertString = 1
         else:
             self._convertString = 0
@@ -152,5 +159,6 @@ class ConversionConfigClass(object):
         _jpype.setConvertStringObjects(self._convertString)
 
     string = property(_getConvertString, _setConvertString, None)
+
 
 ConversionConfig = ConversionConfigClass()

@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,33 +13,36 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
-from . import _jclass
+# *****************************************************************************
+
 import _jpype
 
-def _initialize() :
-	_jclass.registerClassCustomizer(PropertiesCustomizer())
-
-class PropertiesCustomizer(object) :
-	def canCustomize(self, name, jc) :
-		return True
-
-	def customize(self, name, jc, bases, members) :
-		gets = {}
-		sets = {}
-
-		for i in members :
-			if not isinstance(members[i], _jpype._JavaMethod) :
-				continue
-
-			if i[:3] == 'get' :
-				if len(i) > 3 and members[i].isBeanAccessor() :
-					gets[i[3:]] = members[i]
-			elif i[:3] == 'set' :
-				if len(i) > 3 and members[i].isBeanMutator() :
-					sets[i[3:]] = members[i]
-
-		for i in gets :
-			members[i[0].lower() + i[1:]] = property(gets[i], sets.get(i, None))
+from . import _jclass
 
 
+def _initialize():
+    _jclass.registerClassCustomizer(PropertiesCustomizer())
+
+
+class PropertiesCustomizer(object):
+    def canCustomize(self, name, jc):
+        return True
+
+    def customize(self, name, jc, bases, members):
+        gets = {}
+        sets = {}
+
+        for i in members:
+            if not isinstance(members[i], _jpype._JavaMethod):
+                continue
+
+            if i[:3] == 'get':
+                if len(i) > 3 and members[i].isBeanAccessor():
+                    gets[i[3:]] = members[i]
+            elif i[:3] == 'set':
+                if len(i) > 3 and members[i].isBeanMutator():
+                    sets[i[3:]] = members[i]
+
+        for i in gets:
+            members[i[0].lower() + i[1:]] = property(gets[i],
+                                                     sets.get(i, None))

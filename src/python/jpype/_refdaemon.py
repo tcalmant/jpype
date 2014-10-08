@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,20 +13,24 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
+
 import threading
 
 import _jpype
 
+
 def startJava():
     _jpype.startReferenceQueue(1)
 
+
 def startPython():
-    def _run() :
+    def _run():
         _jpype.attachThreadToJVM()
         _jpype.startReferenceQueue(0)
 
     threading.Thread(target=_run).start()
+
 
 def stop():
     _jpype.stopReferenceQueue()

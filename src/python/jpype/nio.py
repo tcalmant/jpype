@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,12 +13,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
+
 import _jpype
 
-def _initialize() :
+
+def _initialize():
     pass
 
+
 def convertToDirectBuffer(obj):
-    '''Efficiently convert all array.array types, string and unicode to java.nio.Buffer objects.'''
+    """
+    Efficiently convert all array.array types, string and unicode to
+    java.nio.Buffer objects.
+    """
     return _jpype.convertToDirectBuffer(obj)

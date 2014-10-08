@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,62 +13,70 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
-from . import _jclass
+# *****************************************************************************
+
 import _jpype
+
+from . import _jclass
+
 
 _CLASSES = {}
 
-def JException(t) :
-	return t.PYEXC
 
-class JavaException(Exception) :
-	def __init__(self, *data) :
-		if isinstance(data[0], tuple) and data[0][0] is _jclass._SPECIAL_CONSTRUCTOR_KEY :
-			# this is wrapped :
-			self.__javaobject__ = data[0][1]
-			self.__javaclass__ = self.__javaobject__.__class__
-		else:
-			self.__javaclass__ = _jclass.JClass(self.__class__.JAVACLASSNAME)
-			self.__javaobject__ = self.__javaclass__(*data)
+def JException(t):
+    return t.PYEXC
 
-		Exception.__init__(self, self.__javaobject__)
 
-	def javaClass(self) :
-		return self.__javaclass__
+class JavaException(Exception):
+    def __init__(self, *data):
+        if isinstance(data[0], tuple) \
+                and data[0][0] is _jclass._SPECIAL_CONSTRUCTOR_KEY:
+            # this is wrapped :
+            self.__javaobject__ = data[0][1]
+            self.__javaclass__ = self.__javaobject__.__class__
+        else:
+            self.__javaclass__ = _jclass.JClass(self.__class__.JAVACLASSNAME)
+            self.__javaobject__ = self.__javaclass__(*data)
 
-	def message(self) :
-		return self.__javaobject__.getMessage()
+        Exception.__init__(self, self.__javaobject__)
 
-	def stacktrace(self) :
-		StringWriter = _jclass.JClass("java.io.StringWriter")
-		PrintWriter = _jclass.JClass("java.io.PrintWriter")
-		sw = StringWriter()
-		pw = PrintWriter(sw)
+    def javaClass(self):
+        return self.__javaclass__
 
-		self.__javaobject__.printStackTrace(pw)
-		pw.flush()
-		r = sw.toString()
-		sw.close()
-		return r
+    def message(self):
+        return self.__javaobject__.getMessage()
 
-	def __str__(self) :
-		return self.__javaobject__.toString()
+    def stacktrace(self):
+        StringWriter = _jclass.JClass("java.io.StringWriter")
+        PrintWriter = _jclass.JClass("java.io.PrintWriter")
+        sw = StringWriter()
+        pw = PrintWriter(sw)
 
-def _initialize() :
-	_jpype.setJavaExceptionClass(JavaException)
+        self.__javaobject__.printStackTrace(pw)
+        pw.flush()
+        r = sw.toString()
+        sw.close()
+        return r
 
-def _makePythonException(name, bc) :
-	name = bc.getName()
+    def __str__(self):
+        return self.__javaobject__.toString()
 
-	if name in _CLASSES:
-		return _CLASSES[name]
 
-	if name == 'java.lang.Throwable' :
-		bases = (JavaException,)
-	else:
-		bases = (_makePythonException(bc.getName(), bc.getBaseClass()) ,)
+def _initialize():
+    _jpype.setJavaExceptionClass(JavaException)
 
-	ec = type(name + "PyRaisable", bases, {'JAVACLASSNAME' : name})
 
-	return ec
+def _makePythonException(name, bc):
+    name = bc.getName()
+
+    if name in _CLASSES:
+        return _CLASSES[name]
+
+    if name == 'java.lang.Throwable':
+        bases = (JavaException,)
+    else:
+        bases = (_makePythonException(bc.getName(), bc.getBaseClass()),)
+
+    ec = type(name + "PyRaisable", bases, {'JAVACLASSNAME': name})
+
+    return ec

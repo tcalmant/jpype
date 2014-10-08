@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,12 +13,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
-KEYWORDS = set((
-    "del", "for", "is", "raise",
-    "assert", "elif", "from", "lambda", "return",
-    "break", "else", "global", "not", "try",
-    "class", "except", "if", "or", "while",
-    "continue", "exec", "import", "pass", "yield",
-    "def", "finally", "in", "print", "as", "None"
-))
+# *****************************************************************************
+
+KEYWORDS = {"del", "for", "is", "raise", "assert", "elif", "from", "lambda",
+            "return", "break", "else", "global", "not", "try", "class",
+            "except", "if", "or", "while", "continue", "exec", "import",
+            "pass", "yield", "def", "finally", "in", "print", "as", "None"}

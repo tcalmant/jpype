@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2013 Thomas Calmant
+# *****************************************************************************
+# Copyright 2013 Thomas Calmant
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,11 +13,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-#*****************************************************************************
+# *****************************************************************************
 
 import os
 
-# ------------------------------------------------------------------------------
 
 class JVMFinder(object):
     """
@@ -37,11 +36,10 @@ class JVMFinder(object):
         self._methods = (self._get_from_java_home,
                          self._get_from_known_locations)
 
-
     def find_libjvm(self, java_home):
         """
         Recursively looks for the given file
-        
+
         :param java_home: A Java home folder
         :param filename: Name of the file to find
         :return: The first found file path, or None
@@ -55,17 +53,15 @@ class JVMFinder(object):
                 filename = os.path.join(root, parent, self._libfile)
                 if os.path.exists(filename):
                     return filename
-
         else:
             # File not found
             return None
-
 
     def find_possible_homes(self, parents):
         """
         Generator that looks for the first-level children folders that could be
         Java installations, according to their name
-        
+
         :param parents: A list of parent directories
         :return: The possible JVM installation folders
         """
@@ -97,7 +93,7 @@ class JVMFinder(object):
     def get_jvm_path(self):
         """
         Retrieves the path to the default or first found JVM library
-        
+
         :return: The path to the JVM shared library file
         :raise ValueError: No JVM library found
         """
@@ -115,13 +111,12 @@ class JVMFinder(object):
                              "Try setting up the JAVA_HOME environment "
                              "variable properly.".format(self._libfile))
 
-
     def _get_from_java_home(self):
         """
         Retrieves the Java library path according to the JAVA_HOME environment
         variable
-        
-        :return: The path to the JVM library, or None 
+
+        :return: The path to the JVM library, or None
         """
         # Get the environment variable
         java_home = os.getenv("JAVA_HOME")
@@ -132,12 +127,11 @@ class JVMFinder(object):
             # Look for the library file
             return self.find_libjvm(java_home)
 
-
     def _get_from_known_locations(self):
         """
         Retrieves the first existing Java library path in the predefined known
         locations
-        
+
         :return: The path to the JVM library, or None
         """
         for home in self.find_possible_homes(self._locations):

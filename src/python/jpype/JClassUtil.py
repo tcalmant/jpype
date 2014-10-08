@@ -1,5 +1,5 @@
-#*****************************************************************************
-#   Copyright 2004-2008 Steve Menard
+# *****************************************************************************
+# Copyright 2004-2008 Steve Menard
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,13 +12,14 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-#   
-#*****************************************************************************
+#
+# *****************************************************************************
 
 from . import _jclass
 
-def isInterface(t) :
-    if not isinstance(t, _jclass._JavaClass) :
+
+def isInterface(t):
+    if not isinstance(t, _jclass._JavaClass):
         return False
-        
+
     return t.__javaclass__.isInterface()
