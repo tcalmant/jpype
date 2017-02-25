@@ -85,7 +85,8 @@ class JDKFinder(object):
             'sources': self.find_sources()
         }
 
-    def find_sources(self):
+    @staticmethod
+    def find_sources():
         """
         Sets up the list of files to be compiled
         """
@@ -96,9 +97,9 @@ class JDKFinder(object):
         # List all .cpp files in those folders
         cpp_files = []
         for folder in (common_dir, python_dir):
-            for root, _, filenames in os.walk(folder):
+            for root, _, file_names in os.walk(folder):
                 cpp_files.extend(os.path.join(root, filename)
-                                 for filename in filenames
+                                 for filename in file_names
                                  if os.path.splitext(filename)[1] == '.cpp')
         return cpp_files
 
@@ -111,7 +112,7 @@ class JDKFinder(object):
         :raise NoJDKError: No JDK found
         """
         java_home = os.getenv("JAVA_HOME")
-        if self.check_jdk(java_home):
+        if self.check_jdk(java_home, True):
             return java_home
         else:
             raise NoJDKError(os.getenv("JAVA_HOME"))
@@ -123,29 +124,35 @@ class JDKFinder(object):
         :param homes: A list of possible JDK homes
         :return: The first JDK home found, or None
         """
-        for java_home in homes:
-            java_home = self.check_jdk(os.path.realpath(java_home))
+        if isinstance(homes, list):
+            homes = {home: False for home in homes}
+
+        for java_home, trusted in homes.items():
+            java_home = self.check_jdk(os.path.realpath(java_home), trusted)
             if java_home is not None:
                 # Valid path
                 return java_home
 
-    def check_jdk(self, java_home):
+    def check_jdk(self, java_home, trusted=False):
         """
         Checks if the given folder can be a JDK installation
 
         :param java_home: A possible JDK installation
+        :param trusted: If True, only check if the "include" folder exists
+                        (don't try to correct it)
         :return: The real folder path if it contains headers, else None
         """
         if not java_home:
             return
+        elif trusted:
+            # Trust the path as is, if it exists
+            if os.path.exists(os.path.join(java_home, 'include')):
+                return os.path.realpath(java_home)
+            else:
+                return None
 
-        # Possible JDK folder names
+        # Find possible JDK folder names
         possible_names = ('jdk', 'java', 'icedtea')
-
-        # Construct the full path
-        java_home = os.path.realpath(java_home)
-        if not os.path.isdir(java_home):
-            return
 
         # Lower-case content tests
         folder = os.path.basename(java_home).lower()
@@ -157,7 +164,7 @@ class JDKFinder(object):
                 include_path = os.path.join(java_home, 'include')
                 if os.path.exists(include_path):
                     # Match
-                    return java_home
+                    return os.path.realpath(java_home)
 
 # ------------------------------------------------------------------------------
 
@@ -206,7 +213,7 @@ class WindowsJDKFinder(JDKFinder):
 
         # Try from registry
         java_home = self._get_from_registry()
-        if java_home and self.check_jdk(java_home):
+        if java_home and self.check_jdk(java_home, True):
             return java_home
 
         # Try with known locations
@@ -229,7 +236,8 @@ class WindowsJDKFinder(JDKFinder):
             visited_folders.extend(possible_homes)
             raise NoJDKError(visited_folders)
 
-    def _get_from_registry(self):
+    @staticmethod
+    def _get_from_registry():
         """
         Retrieves the path to the default Java installation stored in the
         Windows registry
@@ -326,15 +334,23 @@ class DarwinJDKFinder(JDKFinder):
             visited_folders.extend(possible_homes)
             raise NoJDKError(visited_folders)
 
-    def check_jdk(self, java_home):
+    def check_jdk(self, java_home, trusted=False):
         """
         Checks if the given folder can be a JDK installation for Mac OS X
 
         :param java_home: A possible JDK installation
+        :param trusted: If True, only check if the "include" folder exists
+                        (don't try to correct it)
         :return: The real folder path if it contains headers, else None
         """
         if not java_home:
             return
+        elif trusted:
+            # Trust the path as is, if it exists
+            if os.path.exists(os.path.join(java_home, 'include')):
+                return os.path.realpath(java_home)
+            else:
+                return None
 
         # Lower-case content tests
         folder = os.path.basename(java_home).lower()
