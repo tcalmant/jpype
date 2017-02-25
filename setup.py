@@ -22,15 +22,6 @@ Requires Visual C++ (Express) 2010 to be installed on Windows.
     limitations under the License.
 """
 
-# Module version
-__version_info__ = (0, 5, 5, 2)
-__version__ = ".".join(str(x) for x in __version_info__)
-
-# Documentation strings format
-__docformat__ = "restructuredtext en"
-
-# ------------------------------------------------------------------------------
-
 import os
 import sys
 import platform
@@ -39,6 +30,15 @@ from glob import glob
 from setuptools import setup
 from setuptools import Extension
 from setuptools.command.build_ext import build_ext
+
+# ------------------------------------------------------------------------------
+
+# Module version
+__version_info__ = (0, 5, 5, 3)
+__version__ = ".".join(str(x) for x in __version_info__)
+
+# Documentation strings format
+__docformat__ = "restructuredtext en"
 
 # ------------------------------------------------------------------------------
 
