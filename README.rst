@@ -1,3 +1,22 @@
+DEPRECATION WARNING
+###################
+
+This fork was the only Python 3-compatible version of JPype for a while,
+but it has since stalled and its root project,
+`jpype-project/jpype <https://github.com/jpype-project/jpype>`_ has since added
+a lot feature, including said support of Py3.
+
+`Issue #28 <https://github.com/tcalmant/jpype-py3/issues/28>`_ has shown that
+the differences between the two forks are mainly on implementation and
+distribution level.
+
+As a result, this fork is now deprecated and should not be used anymore.
+Version 0.5.5.4 will be the last published version of this repository, and only
+adds deprecation warning at installation and import time.
+
+This project will stay archived on GitHub, and won't evolve anymore.
+
+
 JPype - Python 3
 ################
 
