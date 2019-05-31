@@ -34,7 +34,7 @@ from setuptools.command.build_ext import build_ext
 # ------------------------------------------------------------------------------
 
 # Module version
-__version_info__ = (0, 5, 5, 3)
+__version_info__ = (0, 5, 5, 4)
 __version__ = ".".join(str(x) for x in __version_info__)
 
 # Documentation strings format
@@ -44,8 +44,21 @@ __docformat__ = "restructuredtext en"
 
 if sys.version_info[0] < 3:
     print("This module can only be used with Python 3.")
-    print("For a Python 2 version, see:\nhttps://github.com/originell/jpype")
+    print("For a Python 2 version, see:")
+    print("https://github.com/jpype-project/jpype")
     sys.exit(1)
+
+print("""
+**** DEPRECATION WARNING ****
+This version of JPype is now deprecated, see issue #29 for more details:
+    https://github.com/tcalmant/jpype-py3/issues/29
+
+Please use this version instead:
+    https://github.com/jpype-project/jpype
+
+It can be installed using:
+    pip install JPype1
+""", file=sys.stderr)
 
 # ------------------------------------------------------------------------------
 
@@ -569,7 +582,8 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Java',
-        'Programming Language :: Python :: 3'
+        'Programming Language :: Python :: 3',
+        'Development Status :: 7 - Inactive'
     ],
     packages=[
         "jpype", 'jpype.awt', 'jpype.awt.event',
