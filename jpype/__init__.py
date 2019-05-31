@@ -15,6 +15,8 @@
 #
 # *****************************************************************************
 
+import warnings
+
 from ._jpackage import *
 from ._jclass import *
 from ._jarray import *
@@ -25,8 +27,15 @@ from ._core import *
 from ._gui import *
 
 # Module version (same as in the setup file)
-__version_info__ = (0, 5, 5, 2)
+__version_info__ = (0, 5, 5, 4)
 __version__ = ".".join(str(x) for x in __version_info__)
 
 java = JPackage("java")
 javax = JPackage("javax")
+
+# Deprecation warning
+warnings.warn(
+    "This version of JPype is now deprecated. Please use this version "
+    "instead: https://github.com/jpype-project/jpype",
+    DeprecationWarning, stacklevel=2
+)
