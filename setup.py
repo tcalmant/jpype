@@ -23,8 +23,9 @@ Requires Visual C++ (Express) 2010 to be installed on Windows.
 """
 
 import os
-import sys
 import platform
+import sys
+import time
 from glob import glob
 
 from setuptools import setup
@@ -48,17 +49,20 @@ if sys.version_info[0] < 3:
     print("https://github.com/jpype-project/jpype")
     sys.exit(1)
 
+
 print("""
-**** DEPRECATION WARNING ****
-This version of JPype is now deprecated, see issue #29 for more details:
-    https://github.com/tcalmant/jpype-py3/issues/29
-
-Please use this version instead:
-    https://github.com/jpype-project/jpype
-
-It can be installed using:
-    pip install JPype1
+********* DEPRECATION WARNING *********
+Warning: This version of JPype is now deprecated, see issue #29 for more details
+Warning:     https://github.com/tcalmant/jpype-py3/issues/29
+Warning: 
+Warning: Please use this version instead:
+Warning:     https://github.com/jpype-project/jpype
+Warning: 
+Warning: It can be installed using:
+Warning:     pip install JPype1
+********* DEPRECATION WARNING *********
 """, file=sys.stderr)
+time.sleep(1)
 
 # ------------------------------------------------------------------------------
 
